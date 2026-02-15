@@ -1,5 +1,5 @@
 "use client"
-
+import DashboardLoading from "@/components/DashboardLoading"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
