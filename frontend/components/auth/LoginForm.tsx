@@ -1,3 +1,5 @@
+
+
 "use client"
 
 import { useForm } from "react-hook-form"
@@ -28,20 +30,25 @@ export default function LoginForm() {
   })
 
   const onSubmit = (data: FormData) => {
-
+ 
   const role = data.email.includes("official")
     ? "official"
     : "citizen"
-
-  // Store session in localStorage
+ 
+  localStorage.setItem("token", "dummy-token")
   localStorage.setItem("userRole", role)
 
   toast.success(`Logged in as ${role}`)
-
+ 
   setTimeout(() => {
-    router.push("/dashboard")
+    if (role === "official") {
+      router.push("/admin")
+    } else {
+      router.push("/dashboard")
+    }
   }, 1500)
 }
+
 
 
   return (

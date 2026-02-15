@@ -1,3 +1,5 @@
+
+
 "use client"
 
 import { useForm } from "react-hook-form"
@@ -38,18 +40,24 @@ export default function RegisterForm() {
     resolver: zodResolver(schema),
     mode: "onChange"
   })
+const onSubmit = (data: FormData) => {
 
-  const onSubmit = (data: FormData) => {
+  // ✅ Store auth session
+  localStorage.setItem("token", "dummy-token")
+  localStorage.setItem("userRole", data.role)
 
-    // Store user session
-    localStorage.setItem("userRole", data.role)
+  toast.success("Registration successful!")
 
-    toast.success("Registration successful!")
-
-    setTimeout(() => {
+  // ✅ Redirect based on role
+  setTimeout(() => {
+    if (data.role === "official") {
+      router.push("/admin")
+    } else {
       router.push("/dashboard")
-    }, 1500)
-  }
+    }
+  }, 1500)
+}
+
 
   return (
     <div className="space-y-6">
