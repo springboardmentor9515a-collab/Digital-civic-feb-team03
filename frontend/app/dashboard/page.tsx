@@ -32,7 +32,9 @@ export default function Dashboard() {
     router.push("/login")
   }
 
-  if (!role) return null
+  if (!role) {
+  return <DashboardLoading />
+}
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard },
