@@ -1,5 +1,5 @@
 "use client"
-
+import DashboardLoading from "./DashboardLoading"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
@@ -18,21 +18,25 @@ export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
-    const storedRole = localStorage.getItem("userRole")
+  const token = localStorage.getItem("token")
+  const storedRole = localStorage.getItem("userRole")
 
-    if (!storedRole) {
-      router.push("/login")
-    } else {
-      setRole(storedRole)
-    }
-  }, [router])
+  if (!token || !storedRole) {
+    router.replace("/login")
+    return
+  }
+
+  setRole(storedRole)
+}, [router])
 
   const handleLogout = () => {
     localStorage.removeItem("userRole")
     router.push("/login")
   }
 
-  if (!role) return null
+  if (!role) {
+  return <DashboardLoading />
+}
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard },
