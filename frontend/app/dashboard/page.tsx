@@ -1,72 +1,70 @@
 "use client"
+
 import DashboardLoading from "./DashboardLoading"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import {
-  LayoutDashboard,
-  ClipboardList,
-  User,
-  LogOut,
-  Menu
-} from "lucide-react"
+import { LayoutDashboard, ClipboardList, User, LogOut, Menu } from "lucide-react"
+import { getCurrentUser } from "@/lib/api"
 
 export default function Dashboard() {
-
   const router = useRouter()
   const [role, setRole] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
-  const token = localStorage.getItem("token")
-  const storedRole = localStorage.getItem("userRole")
+    const loadUser = async () => {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        router.replace("/login")
+        return
+      }
 
-  if (!token || !storedRole) {
-    router.replace("/login")
-    return
-  }
+      try {
+        const result = await getCurrentUser(token)
+        setRole(result.user.role)
+        localStorage.setItem("userRole", result.user.role)
+        localStorage.setItem("userName", result.user.name)
+      } catch {
+        localStorage.removeItem("token")
+        localStorage.removeItem("userRole")
+        localStorage.removeItem("userName")
+        router.replace("/login")
+      }
+    }
 
-  setRole(storedRole)
-}, [router])
+    loadUser()
+  }, [router])
 
   const handleLogout = () => {
+    localStorage.removeItem("token")
     localStorage.removeItem("userRole")
+    localStorage.removeItem("userName")
     router.push("/login")
   }
 
   if (!role) {
-  return <DashboardLoading />
-}
+    return <DashboardLoading />
+  }
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard },
     {
-      name: role === "official"
-        ? "Manage Complaints"
-        : "My Complaints",
-      icon: ClipboardList
+      name: role === "official" ? "Manage Complaints" : "My Complaints",
+      icon: ClipboardList,
     },
-    { name: "Profile", icon: User }
+    { name: "Profile", icon: User },
   ]
 
   return (
     <div className="min-h-screen flex bg-slate-950 text-white">
-
-      {/* Sidebar */}
       <aside
         className={`${
           collapsed ? "w-20" : "w-64"
         } bg-slate-900 border-r border-slate-800 p-4 flex flex-col transition-all duration-300`}
       >
-
-        {/* Top Section */}
         <div className="flex items-center justify-between mb-8">
-
-          {!collapsed && (
-            <h2 className="text-xl font-bold text-blue-400">
-              Grievance Portal
-            </h2>
-          )}
+          {!collapsed && <h2 className="text-xl font-bold text-blue-400">Grievance Portal</h2>}
 
           <button
             onClick={() => setCollapsed(!collapsed)}
@@ -74,10 +72,8 @@ export default function Dashboard() {
           >
             <Menu size={20} />
           </button>
-
         </div>
 
-        {/* Navigation */}
         <nav className="space-y-3 flex-1">
           {menuItems.map((item, index) => (
             <div
@@ -90,14 +86,8 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        {/* Bottom Section */}
         <div className="space-y-4">
-
-          {!collapsed && (
-            <div className="text-sm text-slate-500">
-              Logged in as {role}
-            </div>
-          )}
+          {!collapsed && <div className="text-sm text-slate-500">Logged in as {role}</div>}
 
           <button
             onClick={handleLogout}
@@ -106,20 +96,13 @@ export default function Dashboard() {
             <LogOut size={18} />
             {!collapsed && <span>Logout</span>}
           </button>
-
         </div>
-
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 p-10">
-
-        <h1 className="text-4xl font-bold mb-10 capitalize">
-          {role} Dashboard
-        </h1>
+        <h1 className="text-4xl font-bold mb-10 capitalize">{role} Dashboard</h1>
 
         <div className="grid grid-cols-3 gap-8">
-
           {["Total", "Pending", "Resolved"].map((item, index) => (
             <motion.div
               key={item}
@@ -130,22 +113,16 @@ export default function Dashboard() {
               className="p-8 bg-slate-900 rounded-2xl shadow-xl border border-slate-800"
             >
               <h3 className="text-lg text-slate-400">
-                {role === "official"
-                  ? `${item} Cases`
-                  : `${item} Complaints`}
+                {role === "official" ? `${item} Cases` : `${item} Complaints`}
               </h3>
 
               <p className="text-5xl font-bold text-blue-500 mt-4">
                 {Math.floor(Math.random() * 50) + 10}
               </p>
-
             </motion.div>
           ))}
-
         </div>
-
       </main>
-
     </div>
   )
 }

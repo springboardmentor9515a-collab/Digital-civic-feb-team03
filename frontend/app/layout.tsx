@@ -1,5 +1,8 @@
 import type { Metadata } from "next"
 import { Toaster } from "sonner"
+import "./globals.css";
+
+import "../node_modules/tw-animate-css/dist/tw-animate.css"
 import "./globals.css"
 
 export const metadata: Metadata = {
