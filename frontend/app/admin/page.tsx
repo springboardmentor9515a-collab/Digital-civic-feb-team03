@@ -3,22 +3,33 @@
 import Dashboard from "@/app/dashboard/page"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { getCurrentUser } from "@/lib/api"
 
 export default function AdminPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    const role = localStorage.getItem("userRole")
+    const guardAdminRoute = async () => {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        router.replace("/login")
+        return
+      }
 
-    if (!token) {
-      router.replace("/login")
-      return
+      try {
+        const result = await getCurrentUser(token)
+        if (result.user.role !== "official") {
+          router.replace("/dashboard")
+        }
+      } catch {
+        localStorage.removeItem("token")
+        localStorage.removeItem("userRole")
+        localStorage.removeItem("userName")
+        router.replace("/login")
+      }
     }
 
-    if (role !== "official") {
-      router.replace("/dashboard")
-    }
+    guardAdminRoute()
   }, [router])
 
   return <Dashboard />
