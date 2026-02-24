@@ -49,26 +49,26 @@ export default function CreatePetition() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 p-4">
 
-      {/* Square Grey Box */}
+      {/* Dark Container */}
       <div className="bg-gray-100 w-[500px] min-h-[500px] p-8 rounded-xl shadow-2xl">
 
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
+        <h1 className="text-3xl font-bold text-center text-black mb-8">
           📝 Create Petition
         </h1>
 
         {error && (
-          <p className="text-red-600 text-center mb-4 font-medium">{error}</p>
+          <p className="text-red-500 text-center mb-4 font-medium">{error}</p>
         )}
 
         {success && (
-          <p className="text-green-600 text-center mb-4 font-medium">{success}</p>
+          <p className="text-green-400 text-center mb-4 font-medium">{success}</p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
           {/* Title */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">
+            <label className="block mb-2 font-semibold text-black">
               Petition Title
             </label>
             <input
@@ -76,13 +76,13 @@ export default function CreatePetition() {
               placeholder="Enter petition title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-3 border border-gray-400 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full p-3 border border-gray-600 rounded-lg bg-white text-black placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">
+            <label className="block mb-2 font-semibold text-black">
               Description
             </label>
             <textarea
@@ -90,39 +90,51 @@ export default function CreatePetition() {
               placeholder="Enter detailed description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-3 border border-gray-400 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full p-3 border border-gray-600 rounded-lg bg-white text-black placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           {/* Category */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">
+            <label className="block mb-2 font-semibold text-black">
               Category
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full p-3 border border-gray-400 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full p-3 border border-gray-600 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 outline-none"
             >
-              <option value="">Select Category</option>
-              <option value="Education">Education</option>
-              <option value="Environment">Environment</option>
-              <option value="Health">Health</option>
-              <option value="Infrastructure">Infrastructure</option>
-              <option value="Other">Other</option>
+              <option value="" className="bg-black text-white">
+                Select Category
+              </option>
+              <option value="Education" className="bg-black text-white">
+                Education
+              </option>
+              <option value="Environment" className="bg-black text-white">
+                Environment
+              </option>
+              <option value="Health" className="bg-black text-white">
+                Health
+              </option>
+              <option value="Infrastructure" className="bg-black text-white">
+                Infrastructure
+              </option>
+              <option value="Other" className="bg-black text-white">
+                Other
+              </option>
             </select>
           </div>
 
           {/* Location */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">
+            <label className="block mb-2 font-semibold text-black">
               Location
             </label>
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full p-3 border border-gray-400 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full p-3 border border-gray-600 rounded-lg bg-white text-black placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
