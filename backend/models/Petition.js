@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const petitionSchema = new mongoose.Schema(
   {
@@ -22,4 +22,4 @@ const petitionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Petition", petitionSchema);
+module.exports = mongoose.model("Petition", petitionSchema);
