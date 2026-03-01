@@ -1,8 +1,10 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
+
 const connectDB = require("./src/config/db");
 const authRoutes = require("./src/routes/authRoutes");
+const signatureRoutes = require("./src/routes/signatureRoutes");
 
 dotenv.config();
 connectDB();
@@ -15,7 +17,7 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
-
+app.use("/api/petitions", signatureRoutes); 
 
 app.get("/", (req, res) => {
   res.send("Backend is running...");
