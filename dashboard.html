@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CivicConnect | Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<h2>Petitions</h2>
+<section class="petition-section">
+  <h2 class="section-title">Community Petitions</h2>
+
+  <div class="filter-bar">
+    <select id="filterLocation">
+      <option value="">All Locations</option>
+      <option value="Chennai">Chennai</option>
+    </select>
+
+    <select id="filterCategory">
+      <option value="">All Categories</option>
+      <option value="Infrastructure">Infrastructure</option>
+    </select>
+
+    <select id="filterStatus">
+      <option value="">All Status</option>
+      <option value="active">Active</option>
+      <option value="under_review">Under Review</option>
+      <option value="closed">Closed</option>
+    </select>
+
+    <button class="apply-btn" onclick="loadPetitions()">Apply Filters</button>
+  </div>
+
+  <div id="petitionList" class="petition-grid"></div>
+</section>
+<div>
+  <select id="filterLocation">
+    <option value="">All Locations</option>
+    <option value="Chennai">Chennai</option>
+  </select>
+
+  <select id="filterCategory">
+    <option value="">All Categories</option>
+    <option value="Infrastructure">Infrastructure</option>
+  </select>
+
+  <select id="filterStatus">
+    <option value="">All Status</option>
+    <option value="active">Active</option>
+    <option value="under_review">Under Review</option>
+    <option value="closed">Closed</option>
+  </select>
+
+  <button onclick="loadPetitions()">Apply Filters</button>
+</div>
+
+<div id="petitionList"></div>
+<canvas id="bgCanvas"></canvas>
+
+<div class="dashboard">
+
+    <div class="sidebar" id="sidebar">
+        <h2>CivicConnect</h2>
+        <ul>
+            <li onclick="showSection('overview', event)" class="active">Overview</li>
+            <li onclick="showSection('reports', event)">Reports</li>
+            <li onclick="toggleTheme()">Toggle Theme</li>
+            <li onclick="logout()">Logout</li>
+        </ul>
+        <button class="collapse-btn" onclick="toggleSidebar()">☰</button>
+    </div>
+
+    <div class="main">
+
+        <div id="overview" class="section">
+            <h1>Dashboard Overview</h1>
+
+            <div class="cards">
+                <div class="box tilt">
+                    Total Complaints
+                    <h2 id="complaints">0</h2>
+                </div>
+
+                <div class="box tilt">
+                    Active Users
+                    <h2 id="users">0</h2>
+                </div>
+
+                <div class="box tilt">
+                    Resolved Issues
+                    <h2 id="resolved">0</h2>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+
+        <div id="reports" class="section hidden">
+            <h1>Reports</h1>
+
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Issue</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="reportData"></tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<div id="notification" class="notification-popup">
+    🔔 New Complaint Submitted!
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
