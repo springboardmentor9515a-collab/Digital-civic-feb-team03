@@ -1,23 +1,41 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
+<<<<<<< HEAD
 
 const connectDB = require("./src/config/db");
 const authRoutes = require("./src/routes/authRoutes");
 const signatureRoutes = require("./src/routes/signatureRoutes");
+=======
+const cors = require("cors");
+const connectDB = require("./src/config/db");
+const authRoutes = require("./src/routes/authRoutes");
+const petitionRoutes = require("./routes/petitionRoutes");
+>>>>>>> main
 
 dotenv.config();
 connectDB();
-
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
 const app = express();
 
 // Middleware
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
+<<<<<<< HEAD
 app.use("/api/petitions", signatureRoutes); 
+=======
+app.use("/api/petitions", petitionRoutes);
+>>>>>>> main
 
 app.get("/", (req, res) => {
   res.send("Backend is running...");
