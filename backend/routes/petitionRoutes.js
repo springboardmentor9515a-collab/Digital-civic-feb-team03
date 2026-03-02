@@ -1,62 +1,23 @@
-import express from "express";
-import Petition from "../models/Petition.js";
+const express = require("express");
+const { createPetition, getPetitions, getPetitionById } = require("../controllers/petitionController");
+const auth = require("../src/middleware/authMiddleware");
+const { isCitizen } = require("../src/middleware/roleMiddleware");
 
 const router = express.Router();
 
 /* ===========================
-   GET ALL PETITIONS
+   CREATE PETITION (Auth required, Citizen only)
 =========================== */
-router.get("/", async (req, res) => {
-  try {
-    const petitions = await Petition.find();
-    res.json(petitions);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post("/", auth, isCitizen, createPetition);
 
 /* ===========================
-   GET SINGLE PETITION
+   GET ALL PETITIONS (Public endpoint with filters)
 =========================== */
-router.get("/:id", async (req, res) => {
-  try {
-    const petition = await Petition.findById(req.params.id);
-
-    if (!petition) {
-      return res.status(404).json({ message: "Petition not found" });
-    }
-
-    res.json(petition);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.get("/", getPetitions);
 
 /* ===========================
-   SIGN PETITION
+   GET SINGLE PETITION BY ID (Public endpoint)
 =========================== */
-router.post("/:id/sign", async (req, res) => {
-  try {
-    const petition = await Petition.findById(req.params.id);
+router.get("/:id", getPetitionById);
 
-    if (!petition) {
-      return res.status(404).json({ message: "Petition not found" });
-    }
-
-    petition.signatures.push({
-      signedAt: new Date()
-    });
-
-    await petition.save();
-
-    res.json({
-      message: "Signed successfully",
-      totalSignatures: petition.signatures.length
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-export default router;
+module.exports = router;
