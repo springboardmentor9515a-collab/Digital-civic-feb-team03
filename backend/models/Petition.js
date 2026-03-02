@@ -1,25 +1,40 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const petitionSchema = new mongoose.Schema(
   {
-    title: String,
-    description: String,
-    category: String,
-    location: String,
+    title: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String,
+      required: true
+    },
+    category: {
+      type: String,
+      required: true,
+      index: true
+    },
+    location: {
+      type: String,
+      required: true,
+      index: true
+    },
     status: {
       type: String,
-      default: "active"
+      enum: ["active", "under_review", "closed"],
+      default: "under_review",
+      index: true
     },
-    signatures: [
-      {
-        signedAt: {
-          type: Date,
-          default: Date.now
-        }
-      }
-    ]
+    creator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    }
   },
-  { timestamps: true }
+  {
+    timestamps: true
+  }
 );
 
-export default mongoose.model("Petition", petitionSchema);
+module.exports = mongoose.model("Petition", petitionSchema);
