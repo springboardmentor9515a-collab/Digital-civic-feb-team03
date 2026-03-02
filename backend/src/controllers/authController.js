@@ -43,6 +43,7 @@ exports.getMe = async (req, res) => {
 // ================= REGISTER =================
 exports.registerUser = async (req, res) => {
   try {
+
     const { name, email, password, role, location } = req.body;
 
     //  Check if all fields exist
@@ -128,3 +129,5 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
+
