@@ -1,16 +1,36 @@
 "use client"
 
+import SignPetition from "@/components/SignPetition"
+import RoleBasedUI from "@/components/RoleBasedUI"
 import DashboardLoading from "./DashboardLoading"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { LayoutDashboard, ClipboardList, User, LogOut, Menu } from "lucide-react"
 import { getCurrentUser } from "@/lib/api"
+import { getCurrentUser } from "@/lib/api"
 
 export default function Dashboard() {
   const router = useRouter()
   const [role, setRole] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
+  const [petitions, setPetitions] = useState([
+  {
+    id: "p1",
+    title: "Improve Road Conditions",
+    status: "active",
+    signatures: 12,
+    signedUsers: [],
+    location: "Odisha",
+  },
+])
+  const updatePetition = (updatedPetition: any) => {
+  setPetitions((prev) =>
+    prev.map((p) =>
+      p.id === updatedPetition.id ? updatedPetition : p
+    )
+  )
+}
 
   useEffect(() => {
     const token = localStorage.getItem("token")
@@ -167,3 +187,45 @@ export default function Dashboard() {
     </div>
   )
 }
+{/* Petition Section */}
+<div className="mt-16">
+  <h2 className="text-2xl font-bold mb-6">Active Petitions</h2>
+
+  <RoleBasedUI
+    user={{ id: "user1", role: role, location: "Odisha" }}
+    petitions={petitions}
+  />
+
+  <div className="mt-6 space-y-6">
+    {petitions.map((petition) => (
+      <div
+        key={petition.id}
+        className="p-6 bg-white rounded-xl shadow-md"
+      >
+        <h3 className="text-xl font-semibold">
+          {petition.title}
+        </h3>
+
+        <p className="text-gray-500 mt-2">
+          Status: {petition.status}
+        </p>
+
+        <p className="text-indigo-600 font-bold mt-2">
+          Signatures: {petition.signatures}
+        </p>
+
+        <div className="mt-4">
+          <SignPetition
+            user={{
+              id: "user1",
+              role: role,
+              location: "Odisha",
+            }}
+            petition={petition}
+            onUpdate={updatePetition}
+          />
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
