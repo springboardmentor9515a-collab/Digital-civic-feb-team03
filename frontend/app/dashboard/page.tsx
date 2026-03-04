@@ -1,5 +1,7 @@
 "use client"
 
+import SignPetition from "@/components/SignPetition"
+import RoleBasedUI from "@/components/RoleBasedUI"
 import DashboardLoading from "./DashboardLoading"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -13,6 +15,24 @@ export default function Dashboard() {
   const [role, setRole] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [petitions, setPetitions] = useState([
+    {
+      id: "p1",
+      title: "Improve Road Conditions",
+      status: "active",
+      signatures: 12,
+      signedUsers: [] as string[],
+      location: "Odisha",
+    },
+  ])
+
+  const updatePetition = (updatedPetition: any) => {
+    setPetitions((prev) =>
+      prev.map((p) =>
+        p.id === updatedPetition.id ? updatedPetition : p
+      )
+    )
+  }
 
   useEffect(() => {
     const token = localStorage.getItem("token")
@@ -33,7 +53,7 @@ export default function Dashboard() {
         localStorage.setItem("userName", result.user.name)
       } catch (error) {
         // Clear storage on auth failure
-        localStorage.clear() 
+        localStorage.clear()
         router.replace("/login")
       } finally {
         setIsLoading(false)
@@ -62,19 +82,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 text-gray-900">
-      
+
       {/* Sidebar */}
       <aside
-        className={`${
-          collapsed ? "w-20" : "w-64"
-        } bg-gradient-to-b from-indigo-500 to-purple-600 
+        className={`${collapsed ? "w-20" : "w-64"
+          } bg-gradient-to-b from-indigo-500 to-purple-600 
         text-white p-4 flex flex-col transition-all duration-300 shadow-xl`}
       >
         <div className="flex items-center justify-between mb-8">
           {!collapsed && (
-            <motion.h2 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.h2
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="text-xl font-bold tracking-wide truncate"
             >
               Grievance Portal
@@ -127,7 +146,7 @@ export default function Dashboard() {
             Welcome back 👋
           </h1>
           <p className="text-gray-600 mt-2">
-            Here’s an overview of your <span className="font-medium text-indigo-600">{role}</span> activity.
+            Here's an overview of your <span className="font-medium text-indigo-600">{role}</span> activity.
           </p>
         </div>
 
@@ -159,6 +178,49 @@ export default function Dashboard() {
               </div>
             </motion.div>
           ))}
+        </div>
+
+        {/* Petition Section */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold mb-6">Active Petitions</h2>
+
+          <RoleBasedUI
+            user={{ id: "user1", role: role, location: "Odisha" }}
+            petitions={petitions}
+          />
+
+          <div className="mt-6 space-y-6">
+            {petitions.map((petition) => (
+              <div
+                key={petition.id}
+                className="p-6 bg-white rounded-xl shadow-md"
+              >
+                <h3 className="text-xl font-semibold">
+                  {petition.title}
+                </h3>
+
+                <p className="text-gray-500 mt-2">
+                  Status: {petition.status}
+                </p>
+
+                <p className="text-indigo-600 font-bold mt-2">
+                  Signatures: {petition.signatures}
+                </p>
+
+                <div className="mt-4">
+                  <SignPetition
+                    user={{
+                      id: "user1",
+                      role: role,
+                      location: "Odisha",
+                    }}
+                    petition={petition}
+                    onUpdate={updatePetition}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
     </div>
