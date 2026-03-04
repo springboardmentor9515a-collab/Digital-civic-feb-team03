@@ -7,32 +7,16 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { LayoutDashboard, ClipboardList, User, LogOut, Menu, CheckCircle } from "lucide-react"
-import { getCurrentUser } from "@/lib/api"
+import { getCurrentUser, getPetitions, type Petition } from "@/lib/api"
 
 export default function Dashboard() {
   const router = useRouter()
-  // Initialize from localStorage to prevent unnecessary loading states
   const [role, setRole] = useState<string | null>(null)
+  const [userLocation, setUserLocation] = useState<string>("")
+  const [userId, setUserId] = useState<string>("")
   const [collapsed, setCollapsed] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [petitions, setPetitions] = useState([
-    {
-      id: "p1",
-      title: "Improve Road Conditions",
-      status: "active",
-      signatures: 12,
-      signedUsers: [] as string[],
-      location: "Odisha",
-    },
-  ])
-
-  const updatePetition = (updatedPetition: any) => {
-    setPetitions((prev) =>
-      prev.map((p) =>
-        p.id === updatedPetition.id ? updatedPetition : p
-      )
-    )
-  }
+  const [petitions, setPetitions] = useState<Petition[]>([])
 
   useEffect(() => {
     const token = localStorage.getItem("token")
@@ -45,14 +29,27 @@ export default function Dashboard() {
 
     if (storedRole) setRole(storedRole)
 
-    const loadUser = async () => {
+    const loadData = async () => {
       try {
+        // Load user info
         const result = await getCurrentUser(token)
-        setRole(result.user.role)
-        localStorage.setItem("userRole", result.user.role)
-        localStorage.setItem("userName", result.user.name)
+        const user = result.user
+        setRole(user.role)
+        setUserLocation(user.location)
+        setUserId(user.id)
+        localStorage.setItem("userRole", user.role)
+        localStorage.setItem("userName", user.name)
+        localStorage.setItem("userLocation", user.location)
+        localStorage.setItem("userId", user.id)
+
+        // Load petitions — officials see only their location
+        const params: Record<string, string> = {}
+        if (user.role === "official") {
+          params.location = user.location
+        }
+        const petitionData = await getPetitions(params)
+        setPetitions(petitionData.petitions)
       } catch (error) {
-        // Clear storage on auth failure
         localStorage.clear()
         router.replace("/login")
       } finally {
@@ -60,7 +57,7 @@ export default function Dashboard() {
       }
     }
 
-    loadUser()
+    loadData()
   }, [router])
 
   const handleLogout = () => {
@@ -68,8 +65,12 @@ export default function Dashboard() {
     router.push("/login")
   }
 
-  // Show loading only on initial auth check
   if (isLoading && !role) return <DashboardLoading />
+
+  // Compute real stats
+  const totalCount = petitions.length
+  const pendingCount = petitions.filter(p => p.status === "under_review" || p.status === "active").length
+  const resolvedCount = petitions.filter(p => p.status === "resolved").length
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard },
@@ -110,9 +111,9 @@ export default function Dashboard() {
         </div>
 
         <nav className="space-y-3 flex-1">
-          {menuItems.map((item, index) => (
+          {menuItems.map((item) => (
             <div
-              key={item.name} // Better than index
+              key={item.name}
               className="flex items-center gap-3 p-3 rounded-lg 
                          hover:bg-white/20 cursor-pointer transition-all duration-300"
             >
@@ -152,9 +153,9 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { label: "Total", icon: LayoutDashboard, color: "text-indigo-400" },
-            { label: "Pending", icon: ClipboardList, color: "text-yellow-500" },
-            { label: "Resolved", icon: CheckCircle, color: "text-green-500" }
+            { label: "Total", count: totalCount, icon: LayoutDashboard, color: "text-indigo-400" },
+            { label: "Pending", count: pendingCount, icon: ClipboardList, color: "text-yellow-500" },
+            { label: "Resolved", count: resolvedCount, icon: CheckCircle, color: "text-green-500" }
           ].map((item, index) => (
             <motion.div
               key={item.label}
@@ -170,8 +171,7 @@ export default function Dashboard() {
                     {role === "official" ? `${item.label} Cases` : `${item.label} Complaints`}
                   </h3>
                   <p className="text-5xl font-bold text-gray-800 mt-4">
-                    {/* Note: In production, replace with real data from state */}
-                    {Math.floor(Math.random() * 50) + 10}
+                    {item.count}
                   </p>
                 </div>
                 <item.icon size={32} className={item.color} />
@@ -182,45 +182,65 @@ export default function Dashboard() {
 
         {/* Petition Section */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">Active Petitions</h2>
-
-          <RoleBasedUI
-            user={{ id: "user1", role: role, location: "Odisha" }}
-            petitions={petitions}
-          />
-
-          <div className="mt-6 space-y-6">
-            {petitions.map((petition) => (
-              <div
-                key={petition.id}
-                className="p-6 bg-white rounded-xl shadow-md"
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">
+              {role === "official" ? "Petitions in Your Area" : "Active Petitions"}
+            </h2>
+            {role === "citizen" && (
+              <button
+                onClick={() => router.push("/petitions/create")}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition"
               >
-                <h3 className="text-xl font-semibold">
-                  {petition.title}
-                </h3>
-
-                <p className="text-gray-500 mt-2">
-                  Status: {petition.status}
-                </p>
-
-                <p className="text-indigo-600 font-bold mt-2">
-                  Signatures: {petition.signatures}
-                </p>
-
-                <div className="mt-4">
-                  <SignPetition
-                    user={{
-                      id: "user1",
-                      role: role,
-                      location: "Odisha",
-                    }}
-                    petition={petition}
-                    onUpdate={updatePetition}
-                  />
-                </div>
-              </div>
-            ))}
+                + Create Petition
+              </button>
+            )}
           </div>
+
+          {petitions.length === 0 ? (
+            <div className="bg-white rounded-xl p-8 text-center text-gray-500 shadow-md">
+              <p>No petitions found.</p>
+              {role === "citizen" && (
+                <button
+                  onClick={() => router.push("/petitions/create")}
+                  className="mt-4 text-indigo-600 hover:underline"
+                >
+                  Create your first petition →
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {petitions.map((petition) => (
+                <div
+                  key={petition._id}
+                  className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
+                  onClick={() => router.push(`/petitions/${petition._id}`)}
+                >
+                  <div className="flex items-start justify-between">
+                    <h3 className="text-xl font-semibold">
+                      {petition.title}
+                    </h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${petition.status === "active" ? "bg-green-100 text-green-700" :
+                        petition.status === "under_review" ? "bg-yellow-100 text-yellow-700" :
+                          petition.status === "resolved" ? "bg-blue-100 text-blue-700" :
+                            "bg-gray-100 text-gray-700"
+                      }`}>
+                      {petition.status.replace("_", " ")}
+                    </span>
+                  </div>
+
+                  <div className="mt-2 flex gap-4 text-sm text-gray-500">
+                    <span>📍 {petition.location}</span>
+                    <span>📂 {petition.category.replace("_", " ")}</span>
+                  </div>
+
+                  <p className="text-indigo-600 font-bold mt-2">
+                    ✍️ {petition.signatureCount ?? petition.signatures?.length ?? 0} signatures
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>

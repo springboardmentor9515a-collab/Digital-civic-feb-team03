@@ -1,39 +1,42 @@
 "use client"
 import React, { useState } from "react";
-import axios from "axios";
+import { signPetition as signPetitionApi } from "@/lib/api";
 
 const SignPetition = ({ user, petition, onUpdate }) => {
   const [isSigning, setIsSigning] = useState(false);
   const [error, setError] = useState("");
+  const [signed, setSigned] = useState(false);
 
   // Visible only to citizens
   if (user.role !== "citizen") return null;
 
-  const alreadySigned = petition.signedUsers.includes(user.id);
   const isActive = petition.status === "active";
-
-  const isDisabled = alreadySigned || !isActive || isSigning;
+  const isDisabled = signed || !isActive || isSigning;
 
   const handleSign = async () => {
     setError("");
     setIsSigning(true);
 
-    const updatedPetition = {
-      ...petition,
-      signatures: petition.signatures + 1,
-      signedUsers: [...petition.signedUsers, user.id],
-    };
-
-    onUpdate(updatedPetition);
-
     try {
-      await axios.post(`/api/petitions/${petition.id}/sign`, {
-        userId: user.id,
-      });
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("You must be logged in to sign.");
+        setIsSigning(false);
+        return;
+      }
+
+      await signPetitionApi(token, petition._id || petition.id);
+      setSigned(true);
+
+      // Notify parent of update
+      if (onUpdate) {
+        onUpdate({
+          ...petition,
+          signatures: petition.signatures + 1,
+        });
+      }
     } catch (err) {
-      //  Revert optimistic update if failed
-      onUpdate(petition);
-      setError("Failed to sign petition.");
+      setError(err.message || "Failed to sign petition.");
     } finally {
       setIsSigning(false);
     }
@@ -49,19 +52,21 @@ const SignPetition = ({ user, petition, onUpdate }) => {
           color: "#fff",
           padding: "10px 16px",
           border: "none",
+          borderRadius: "8px",
           cursor: isDisabled ? "not-allowed" : "pointer",
+          fontWeight: 600,
         }}
       >
-        {alreadySigned
-          ? "Already Signed"
+        {signed
+          ? "✅ Signed"
           : !isActive
-          ? "Petition Closed"
-          : isSigning
-          ? "Signing..."
-          : "Sign Petition"}
+            ? "Petition Closed"
+            : isSigning
+              ? "Signing..."
+              : "✍️ Sign Petition"}
       </button>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "red", marginTop: "8px" }}>{error}</p>}
     </div>
   );
 };

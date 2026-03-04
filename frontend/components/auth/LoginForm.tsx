@@ -34,6 +34,8 @@ export default function LoginForm() {
       localStorage.setItem("token", result.token)
       localStorage.setItem("userRole", result.user.role)
       localStorage.setItem("userName", result.user.name)
+      localStorage.setItem("userLocation", result.user.location)
+      localStorage.setItem("userId", result.user.id)
 
       toast.success(result.message || `Logged in as ${result.user.role}`)
 

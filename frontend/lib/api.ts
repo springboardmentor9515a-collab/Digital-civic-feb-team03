@@ -76,3 +76,94 @@ export async function getCurrentUser(token: string) {
     },
   });
 }
+
+// ─── Petition Types ──────────────────────────────────────────────
+
+export type PetitionStatus = "under_review" | "active" | "resolved" | "rejected";
+export type PetitionCategory =
+  | "infrastructure"
+  | "environment"
+  | "public_safety"
+  | "education"
+  | "healthcare"
+  | "other";
+
+export type Petition = {
+  _id: string;
+  title: string;
+  description: string;
+  category: PetitionCategory;
+  location: string;
+  status: PetitionStatus;
+  creator: {
+    _id: string;
+    name: string;
+    email?: string;
+    location?: string;
+  };
+  signatures: { user: string; signedAt: string }[];
+  signatureCount?: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PetitionListResponse = {
+  petitions: Petition[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalPetitions: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+};
+
+// ─── Petition APIs ───────────────────────────────────────────────
+
+export async function createPetition(
+  token: string,
+  data: { title: string; description: string; category: PetitionCategory; location: string }
+) {
+  return apiRequest<Petition>("/petitions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getPetitions(params?: {
+  location?: string;
+  category?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const query = new URLSearchParams();
+  if (params?.location) query.set("location", params.location);
+  if (params?.category) query.set("category", params.category);
+  if (params?.status) query.set("status", params.status);
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+
+  const qs = query.toString();
+  return apiRequest<PetitionListResponse>(`/petitions${qs ? `?${qs}` : ""}`);
+}
+
+export async function getPetitionById(id: string) {
+  return apiRequest<Petition>(`/petitions/${id}`);
+}
+
+// ─── Signature APIs ──────────────────────────────────────────────
+
+export async function signPetition(token: string, petitionId: string) {
+  return apiRequest<{ message: string; signature: unknown }>(`/petitions/${petitionId}/sign`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function getSignatureCount(petitionId: string) {
+  return apiRequest<{ petitionId: string; signatureCount: number }>(
+    `/petitions/${petitionId}/signatures/count`
+  );
+}
