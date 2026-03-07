@@ -4,24 +4,26 @@ import DashboardLoading from "./DashboardLoading"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { LayoutDashboard, ClipboardList, User, LogOut, Menu } from "lucide-react"
+import { LayoutDashboard, ClipboardList, User, LogOut, Menu, CheckCircle } from "lucide-react"
 import { getCurrentUser } from "@/lib/api"
 
 export default function Dashboard() {
   const router = useRouter()
+  // Initialize from localStorage to prevent unnecessary loading states
   const [role, setRole] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const token = localStorage.getItem("token")
     const storedRole = localStorage.getItem("userRole")
 
-    if (!token || !storedRole) {
+    if (!token) {
       router.replace("/login")
       return
     }
 
-    setRole(storedRole)
+    if (storedRole) setRole(storedRole)
 
     const loadUser = async () => {
       try {
@@ -29,11 +31,12 @@ export default function Dashboard() {
         setRole(result.user.role)
         localStorage.setItem("userRole", result.user.role)
         localStorage.setItem("userName", result.user.name)
-      } catch {
-        localStorage.removeItem("token")
-        localStorage.removeItem("userRole")
-        localStorage.removeItem("userName")
+      } catch (error) {
+        // Clear storage on auth failure
+        localStorage.clear() 
         router.replace("/login")
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -41,13 +44,12 @@ export default function Dashboard() {
   }, [router])
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("userRole")
-    localStorage.removeItem("userName")
+    localStorage.clear()
     router.push("/login")
   }
 
-  if (!role) return <DashboardLoading />
+  // Show loading only on initial auth check
+  if (isLoading && !role) return <DashboardLoading />
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard },
@@ -70,14 +72,19 @@ export default function Dashboard() {
       >
         <div className="flex items-center justify-between mb-8">
           {!collapsed && (
-            <h2 className="text-xl font-bold tracking-wide">
+            <motion.h2 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="text-xl font-bold tracking-wide truncate"
+            >
               Grievance Portal
-            </h2>
+            </motion.h2>
           )}
 
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="p-2 hover:bg-white/20 rounded-lg transition"
+            aria-label="Toggle Sidebar"
           >
             <Menu size={20} />
           </button>
@@ -86,7 +93,7 @@ export default function Dashboard() {
         <nav className="space-y-3 flex-1">
           {menuItems.map((item, index) => (
             <div
-              key={index}
+              key={item.name} // Better than index
               className="flex items-center gap-3 p-3 rounded-lg 
                          hover:bg-white/20 cursor-pointer transition-all duration-300"
             >
@@ -96,16 +103,16 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        <div className="space-y-4">
+        <div className="space-y-4 border-t border-white/10 pt-4">
           {!collapsed && (
             <div className="text-sm text-white/80">
-              Logged in as <span className="font-semibold">{role}</span>
+              Logged in as <span className="font-semibold capitalize">{role}</span>
             </div>
           )}
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-red-200 hover:text-white transition"
+            className="flex items-center gap-2 text-red-200 hover:text-white transition w-full p-2"
           >
             <LogOut size={18} />
             {!collapsed && <span>Logout</span>}
@@ -114,55 +121,45 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-10">
-        
+      <main className="flex-1 p-10 overflow-y-auto">
         <div className="mb-12">
-          <h1 className="text-4xl font-bold capitalize">
+          <h1 className="text-4xl font-bold">
             Welcome back 👋
           </h1>
           <p className="text-gray-600 mt-2">
-            Here’s an overview of your {role} activity.
+            Here’s an overview of your <span className="font-medium text-indigo-600">{role}</span> activity.
           </p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {["Total", "Pending", "Resolved"].map((item, index) => (
+          {[
+            { label: "Total", icon: LayoutDashboard, color: "text-indigo-400" },
+            { label: "Pending", icon: ClipboardList, color: "text-yellow-500" },
+            { label: "Resolved", icon: CheckCircle, color: "text-green-500" }
+          ].map((item, index) => (
             <motion.div
-              key={item}
-              initial={{ opacity: 0, y: 30 }}
+              key={item.label}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2 }}
-              whileHover={{ scale: 1.05 }}
-              className="p-8 bg-white rounded-2xl shadow-lg"
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.02 }}
+              className="p-8 bg-white rounded-2xl shadow-md border border-gray-100"
             >
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="text-gray-500 text-lg">
-                    {role === "official"
-                      ? `${item} Cases`
-                      : `${item} Complaints`}
+                  <h3 className="text-gray-500 text-lg font-medium">
+                    {role === "official" ? `${item.label} Cases` : `${item.label} Complaints`}
                   </h3>
-
-                  <p className="text-5xl font-bold text-indigo-600 mt-4">
+                  <p className="text-5xl font-bold text-gray-800 mt-4">
+                    {/* Note: In production, replace with real data from state */}
                     {Math.floor(Math.random() * 50) + 10}
                   </p>
                 </div>
-
-                {item === "Total" && (
-                  <LayoutDashboard size={40} className="text-indigo-400" />
-                )}
-                {item === "Pending" && (
-                  <ClipboardList size={40} className="text-yellow-500" />
-                )}
-                {item === "Resolved" && (
-                  <User size={40} className="text-green-500" />
-                )}
+                <item.icon size={32} className={item.color} />
               </div>
             </motion.div>
           ))}
         </div>
-
       </main>
     </div>
   )
