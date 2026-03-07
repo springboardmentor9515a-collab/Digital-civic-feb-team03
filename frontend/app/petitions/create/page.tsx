@@ -2,21 +2,47 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { createPetition, type PetitionCategory } from "@/lib/api"
 
-export default function CreatePetition() {
+const CATEGORIES: { value: PetitionCategory; label: string }[] = [
+  { value: "infrastructure", label: "Infrastructure" },
+  { value: "environment", label: "Environment" },
+  { value: "public_safety", label: "Public Safety" },
+  { value: "education", label: "Education" },
+  { value: "healthcare", label: "Healthcare" },
+  { value: "other", label: "Other" },
+]
+
+export default function CreatePetitionPage() {
   const router = useRouter()
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [category, setCategory] = useState("")
+  const [category, setCategory] = useState<PetitionCategory | "">("")
   const [location, setLocation] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    setLocation("New York")
-  }, [])
+    const token = localStorage.getItem("token")
+    const role = localStorage.getItem("userRole")
+
+    if (!token) {
+      router.replace("/login")
+      return
+    }
+
+    // Only citizens can create petitions
+    if (role && role !== "citizen") {
+      router.replace("/dashboard")
+      return
+    }
+
+    // Auto-fill location from user profile
+    const userLocation = localStorage.getItem("userLocation")
+    if (userLocation) setLocation(userLocation)
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,21 +52,32 @@ export default function CreatePetition() {
       return
     }
 
+    const token = localStorage.getItem("token")
+    if (!token) {
+      setError("❌ You must be logged in")
+      router.replace("/login")
+      return
+    }
+
     try {
       setLoading(true)
       setError("")
       setSuccess("")
 
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await createPetition(token, {
+        title,
+        description,
+        category: category as PetitionCategory,
+        location,
+      })
 
       setSuccess("🎉 Petition created successfully!")
 
       setTimeout(() => {
         router.push("/petitions")
       }, 1500)
-
-    } catch {
-      setError("❌ Something went wrong")
+    } catch (err: any) {
+      setError(err.message || "❌ Something went wrong")
     } finally {
       setLoading(false)
     }
@@ -49,7 +86,7 @@ export default function CreatePetition() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 p-4">
 
-      {/* Dark Container */}
+      {/* Form Container */}
       <div className="bg-gray-100 w-[500px] min-h-[500px] p-8 rounded-xl shadow-2xl">
 
         <h1 className="text-3xl font-bold text-center text-black mb-8">
@@ -61,7 +98,7 @@ export default function CreatePetition() {
         )}
 
         {success && (
-          <p className="text-green-400 text-center mb-4 font-medium">{success}</p>
+          <p className="text-green-600 text-center mb-4 font-medium">{success}</p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -101,27 +138,17 @@ export default function CreatePetition() {
             </label>
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => setCategory(e.target.value as PetitionCategory)}
               className="w-full p-3 border border-gray-600 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 outline-none"
             >
-              <option value="" className="bg-black text-white">
+              <option value="">
                 Select Category
               </option>
-              <option value="Education" className="bg-black text-white">
-                Education
-              </option>
-              <option value="Environment" className="bg-black text-white">
-                Environment
-              </option>
-              <option value="Health" className="bg-black text-white">
-                Health
-              </option>
-              <option value="Infrastructure" className="bg-black text-white">
-                Infrastructure
-              </option>
-              <option value="Other" className="bg-black text-white">
-                Other
-              </option>
+              {CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -134,6 +161,7 @@ export default function CreatePetition() {
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              placeholder="Enter location"
               className="w-full p-3 border border-gray-600 rounded-lg bg-white text-black placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>

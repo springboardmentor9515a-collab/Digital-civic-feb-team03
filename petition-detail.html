@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Petition Detail</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="detail-page">
+
+  <!-- Particle Background -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- Petition Detail Container -->
+  <div class="detail-wrapper">
+    <div id="detailCard" class="detail-card"></div>
+  </div>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+    /* ===============================
+       LOAD PETITION DETAILS
+    =============================== */
+    async function loadDetail() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      if (!id) return;
+
+      const res = await fetch(`http://localhost:5000/api/petitions/${id}`);
+      const p = await res.json();
+
+      document.getElementById("detailCard").innerHTML = `
+        <h1 class="detail-title">${p.title}</h1>
+
+        <div class="creator-section">
+          <div class="creator-avatar">👤</div>
+          <div>
+            <strong>Created By:</strong> Civic Citizen  
+            <span class="role-badge">Citizen</span>
+          </div>
+        </div>
+
+        <p class="detail-description">${p.description}</p>
+
+        <div class="detail-meta">
+          <div><strong>Category</strong><br>${p.category}</div>
+          <div><strong>Location</strong><br>${p.location}</div>
+          <div>
+            <strong>Status</strong><br>
+            <span class="status-badge status-${p.status}">
+              ${p.status.toUpperCase()}
+            </span>
+          </div>
+        </div>
+
+        <div class="signature-section">
+          <h3 id="supportCount">${p.signatures.length} Supporters</h3>
+
+          <div class="progress-bar">
+            <div class="progress-fill"
+                 style="width:${Math.min(p.signatures.length * 10,100)}%">
+            </div>
+          </div>
+
+          <button class="sign-btn" id="signButton">
+            ✍ Sign Petition
+          </button>
+        </div>
+      `;
+
+      /* ===============================
+         SIGN BUTTON EVENT
+      =============================== */
+
+      const signBtn = document.getElementById("signButton");
+
+      signBtn.addEventListener("click", async () => {
+        try {
+          const res = await fetch(
+            `http://localhost:5000/api/petitions/${p._id}/sign`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          );
+
+          const data = await res.json();
+
+          alert("Petition Signed Successfully!");
+
+          // Disable button
+          signBtn.innerText = "✔ Signed";
+          signBtn.disabled = true;
+
+          // Reload to update supporter count
+          setTimeout(() => location.reload(), 800);
+
+        } catch (err) {
+          console.error(err);
+          alert("Error signing petition");
+        }
+      });
+    }
+
+    loadDetail();
+
+
+    /* ===============================
+       PARTICLE BACKGROUND
+    =============================== */
+
+    const canvas = document.getElementById("particleCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    let particles = [];
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.6;
+        this.speedY = (Math.random() - 0.5) * 0.6;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < 0 || this.x > canvas.width ||
+            this.y < 0 || this.y > canvas.height) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.fillStyle = "rgba(0, 200, 255, 0.7)";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < 100; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    initParticles();
+    animate();
+
+  });
+  </script>
+
+</body>
+</html>
