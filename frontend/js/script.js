@@ -190,3 +190,52 @@ function viewPetition(id) {
 }
 
 window.onload = loadPetitions;
+
+/* ================= POLL VOTING ================= */
+
+const pollForm = document.getElementById("pollForm");
+
+if (pollForm) {
+
+    pollForm.addEventListener("submit", function(e) {
+
+        e.preventDefault();
+
+        const selectedOption = document.querySelector('input[name="option"]:checked');
+
+        if (!selectedOption) {
+            alert("Please select an option before voting.");
+            return;
+        }
+
+        // Save vote
+        localStorage.setItem("pollVoted", selectedOption.value);
+
+        // Confirmation message
+        document.getElementById("voteMessage").innerText =
+        "✅ Thank you! Your vote has been submitted.";
+
+        // Disable options
+        document.querySelectorAll('input[name="option"]').forEach(opt => {
+            opt.disabled = true;
+        });
+
+    });
+
+}
+
+/* ================= CHECK IF ALREADY VOTED ================= */
+
+if (localStorage.getItem("pollVoted")) {
+
+    const options = document.querySelectorAll('input[name="option"]');
+
+    options.forEach(opt => opt.disabled = true);
+
+    const msg = document.getElementById("voteMessage");
+
+    if (msg) {
+        msg.innerText = "⚠️ You have already voted in this poll.";
+    }
+
+}
