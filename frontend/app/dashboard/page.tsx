@@ -244,6 +244,25 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+{/* Poll Section */}
+<div className="mt-16">
+  <h2 className="text-2xl font-bold mb-6">Community Polls</h2>
+
+  {/* Citizen UI */}
+  {role === "citizen" && (
+    <div>
+      <VotePoll role={role} />
+    </div>
+  )}
+
+  {/* Official UI */}
+  {role === "official" && (
+    <div>
+      <CreatePoll role={role} />
+    </div>
+  )}
+</div>
+        
         {/* Poll Section */}
 <div className="mt-16">
 
