@@ -1,5 +1,7 @@
 "use client"
 
+import VotePoll from "@/components/VotePoll"
+import CreatePoll from "@/components/CreatePoll"
 import SignPetition from "@/components/SignPetition"
 import RoleBasedUI from "@/components/RoleBasedUI"
 import DashboardLoading from "./DashboardLoading"
@@ -242,7 +244,31 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+        
+        {/* Poll Section */}
+<div className="mt-16">
+
+  <h2 className="text-2xl font-bold mb-6">
+    Community Polls
+  </h2>
+
+  {/* Citizens can vote */}
+  {role === "citizen" && (
+    <div className="mb-10">
+      <VotePoll role={role} />
+    </div>
+  )}
+
+  {/* Officials can create polls */}
+  {role === "official" && (
+    <div>
+      <CreatePoll role={role} />
+    </div>
+  )}
+
+</div>
       </main>
     </div>
   )
 }
+

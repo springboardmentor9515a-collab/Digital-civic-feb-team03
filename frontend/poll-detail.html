@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Community Poll</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<h2 style="text-align:center;">Community Poll</h2>
+
+<!-- Back Button -->
+<div style="text-align:center; margin-bottom:20px;">
+<a href="../dashboard.html">
+<button style="padding:8px 15px;">⬅ Back to Dashboard</button>
+</a>
+</div>
+
+<div class="poll-container">
+
+<h3 id="poll-question">
+Which civic issue should the government prioritize?
+</h3>
+
+<form id="pollForm">
+
+<label class="poll-option">
+<input type="radio" name="option" value="Road Maintenance">
+Road Maintenance
+</label>
+
+<label class="poll-option">
+<input type="radio" name="option" value="Waste Management">
+Waste Management
+</label>
+
+<label class="poll-option">
+<input type="radio" name="option" value="Public Transport">
+Public Transport
+</label>
+
+<label class="poll-option">
+<input type="radio" name="option" value="Water Supply">
+Water Supply
+</label>
+
+<br>
+
+<button type="submit" class="vote-btn">
+Vote
+</button>
+
+</form>
+
+<p id="voteMessage"></p>
+
+</div>
+
+<script src="js/script.js"></script>
+
+</body>
+</html>
