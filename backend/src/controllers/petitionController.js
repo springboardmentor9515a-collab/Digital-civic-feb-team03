@@ -1,5 +1,5 @@
-const Petition = require("../models/Petition.js");
-const User = require("../src/models/user.js");
+const Petition = require("../models/Petition");
+const User = require("../models/user");
 
 // CREATE Petition (Auth required, Citizen only)
 exports.createPetition = async (req, res) => {

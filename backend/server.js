@@ -6,8 +6,9 @@ const cors = require("cors");
 const connectDB = require("./src/config/db");
 const authRoutes = require("./src/routes/authRoutes");
 const signatureRoutes = require("./src/routes/signatureRoutes");
-const petitionRoutes = require("./routes/petitionRoutes");
+const petitionRoutes = require("./src/routes/petitionRoutes");
 const pollRoutes = require("./src/routes/pollRoutes");
+const voteRoutes = require("./src/routes/voteRoutes");
 
 dotenv.config();
 connectDB();
@@ -32,6 +33,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/petitions", signatureRoutes);
 app.use("/api/petitions", petitionRoutes);
 app.use("/api/polls", pollRoutes);
+app.use("/api/polls", voteRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend is running...");
