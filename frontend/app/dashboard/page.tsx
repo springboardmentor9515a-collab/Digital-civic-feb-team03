@@ -1,5 +1,7 @@
 "use client"
 
+import VotePoll from "@/components/VotePoll"
+import CreatePoll from "@/components/CreatePoll"
 import SignPetition from "@/components/SignPetition"
 import RoleBasedUI from "@/components/RoleBasedUI"
 import DashboardLoading from "./DashboardLoading"
