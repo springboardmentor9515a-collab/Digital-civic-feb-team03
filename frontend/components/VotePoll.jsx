@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-export default function VotePoll({ role }: { role: string }) {
+export default function VotePoll({ role }) {
   const [voted, setVoted] = useState(false)
 
   const handleVote = () => {

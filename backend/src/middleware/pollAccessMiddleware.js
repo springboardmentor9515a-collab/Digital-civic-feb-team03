@@ -14,9 +14,20 @@ const attachLocationFilter = (req, res, next) => {
 
   const normalizedLocation = normalizeLocation(req.user.location);
 
-  req.locationFilter = {
-    targetLocation: new RegExp(`^${escapeRegExp(normalizedLocation)}$`, "i"),
-  };
+  if (req.user.role === "official") {
+    // Officials can see polls in their location OR polls they created
+    req.locationFilter = {
+      $or: [
+        { targetLocation: new RegExp(`^${escapeRegExp(normalizedLocation)}$`, "i") },
+        { createdBy: req.user._id }
+      ]
+    };
+  } else {
+    // Citizens can ONLY see polls in their location
+    req.locationFilter = {
+      targetLocation: new RegExp(`^${escapeRegExp(normalizedLocation)}$`, "i"),
+    };
+  }
 
   return next();
 };
@@ -30,7 +41,7 @@ const enforcePollLocationAccess = async (req, res, next) => {
       });
     }
 
-    const poll = await Poll.findById(req.params.id).select("targetLocation");
+    const poll = await Poll.findById(req.params.id).select("targetLocation createdBy");
 
     if (!poll) {
       return res.status(404).json({
@@ -42,10 +53,13 @@ const enforcePollLocationAccess = async (req, res, next) => {
     const userLocation = normalizeLocation(req.user.location).toLowerCase();
     const pollLocation = normalizeLocation(poll.targetLocation).toLowerCase();
 
-    if (userLocation !== pollLocation) {
+    // Allow if it's the official who created it
+    const isCreator = req.user.role === "official" && poll.createdBy && req.user._id.toString() === poll.createdBy.toString();
+
+    if (userLocation !== pollLocation && !isCreator) {
       return res.status(403).json({
         success: false,
-        message: "You can only access polls for your location",
+        message: "You can only access polls for your location or polls you created",
       });
     }
 

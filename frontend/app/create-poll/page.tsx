@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { createPoll, getCurrentUser, getLocations } from "@/lib/api"
 
 export default function CreatePoll() {
   const router = useRouter()
@@ -9,8 +10,32 @@ export default function CreatePoll() {
   const [title, setTitle] = useState("")
   const [location, setLocation] = useState("")
   const [options, setOptions] = useState(["", ""])
+  const [availableLocations, setAvailableLocations] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+        const userRes = await getCurrentUser(token);
+        if (userRes.user.role !== "official") {
+          router.push("/polls");
+          return;
+        }
+
+        const locRes = await getLocations(token);
+        setAvailableLocations(locRes.locations);
+      } catch {
+        router.push("/login");
+      }
+    };
+    checkRole();
+  }, [router]);
 
   const addOption = () => {
     setOptions([...options, ""])
@@ -31,8 +56,9 @@ export default function CreatePoll() {
   const handleSubmit = async (e: any) => {
     e.preventDefault()
 
-    if (options.length < 2) {
-      setError("At least 2 options required")
+    const validOptions = options.filter(o => o.trim() !== "")
+    if (validOptions.length < 2) {
+      setError("At least 2 non-empty options required")
       return
     }
 
@@ -40,30 +66,22 @@ export default function CreatePoll() {
 
     try {
       const token = localStorage.getItem("token")
+      if (!token) throw new Error("Authentication required")
 
-      const res = await fetch("http://localhost:5000/api/polls", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          title,
-          location,
-          options
-        })
+      await createPoll(token, {
+        title,
+        targetLocation: location,
+        options: validOptions
       })
-
-      if (!res.ok) throw new Error()
 
       alert("Poll Created Successfully")
 
       router.push("/polls")
-    } catch {
-      setError("Failed to create poll")
+    } catch (err: any) {
+      setError(err.message || "Failed to create poll")
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (
@@ -91,9 +109,14 @@ export default function CreatePoll() {
           required
         >
           <option value="">Select Location</option>
-          <option value="Ward 1">Ward 1</option>
-          <option value="Ward 2">Ward 2</option>
-          <option value="Ward 3">Ward 3</option>
+          {availableLocations.map((loc, idx) => (
+            <option key={idx} value={loc}>
+              {loc}
+            </option>
+          ))}
+          {availableLocations.length === 0 && (
+            <option disabled>Loading locations...</option>
+          )}
         </select>
 
         {/* Poll Options */}

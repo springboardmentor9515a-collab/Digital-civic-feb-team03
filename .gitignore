@@ -40,3 +40,24 @@ Thumbs.db
 *.swp
 *.swo
 
+
+# database storage files
+*.sst
+*.ldb
+*.meta
+
+# typical database folders
+data/
+db/
+rocksdb/
+
+# Linter caches
+.eslintcache
+.stylelintcache
+.prettiercache
+
+# Misc logs and diagnostics
+build_error*.txt
+*.pid
+*.seed
+*.pid.lock

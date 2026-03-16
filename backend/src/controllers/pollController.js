@@ -1,4 +1,5 @@
 const Poll = require("../models/Poll");
+const Vote = require("../models/Vote");
 
 const sanitizePlainText = (value) =>
   String(value)
@@ -70,9 +71,19 @@ const createPoll = async (req, res) => {
 // Get All Polls
 const getPolls = async (req, res) => {
   try {
-    const polls = await Poll.find(req.locationFilter || {}).sort({
+    const pollsDocs = await Poll.find(req.locationFilter || {}).sort({
       createdAt: -1,
     });
+
+    const polls = await Promise.all(
+      pollsDocs.map(async (poll) => {
+        const totalVotes = await Vote.countDocuments({ poll: poll._id });
+        return {
+          ...poll.toObject(),
+          totalVotes,
+        };
+      })
+    );
 
     res.status(200).json({
       success: true,
@@ -95,7 +106,26 @@ const getPollById = async (req, res) => {
       return res.status(404).json({ message: "Poll not found" });
     }
 
-    res.status(200).json(poll);
+    const results = await Vote.aggregate([
+      { $match: { poll: poll._id } },
+      { $group: { _id: "$selectedOption", count: { $sum: 1 } } },
+    ]);
+
+    const totalVotes = results.reduce((sum, r) => sum + r.count, 0);
+
+    const optionResults = poll.options.map((option) => {
+      const match = results.find((r) => r._id === option);
+      const votes = match ? match.count : 0;
+      const percentage =
+        totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(2) : 0;
+      return { option, votes, percentage: parseFloat(percentage) };
+    });
+
+    res.status(200).json({
+      ...poll.toObject(),
+      totalVotes,
+      results: optionResults,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

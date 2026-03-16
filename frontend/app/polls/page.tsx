@@ -2,38 +2,38 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { getPolls, getCurrentUser, Poll } from "@/lib/api"
 
 export default function PollsPage() {
 
   const router = useRouter()
-  const [polls, setPolls] = useState<any[]>([])
+  const [polls, setPolls] = useState<Poll[]>([])
+  const [role, setRole] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   useEffect(() => {
+    const fetchPolls = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+        const userRes = await getCurrentUser(token);
+        setRole(userRes.user.role);
 
-    const dummyPolls = [
-      {
-        id: 1,
-        title: "Should we add more street lights?",
-        location: "Ward 1",
-        totalVotes: 34
-      },
-      {
-        id: 2,
-        title: "Park renovation proposal",
-        location: "Ward 2",
-        totalVotes: 18
-      },
-      {
-        id: 3,
-        title: "Waste collection timing change",
-        location: "Ward 3",
-        totalVotes: 52
+        const data = await getPolls(token);
+        setPolls(data.polls);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch polls");
+      } finally {
+        setLoading(false);
       }
-    ]
+    };
 
-    setPolls(dummyPolls)
-
-  }, [])
+    fetchPolls();
+  }, [router])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-blue-100 py-12 px-6">
@@ -44,12 +44,19 @@ export default function PollsPage() {
           Community Polls
         </h2>
 
+        {loading && <p className="text-center">Loading polls...</p>}
+        {error && <p className="text-center text-red-500">{error}</p>}
+
+        {!loading && !error && polls.length === 0 && (
+          <p className="text-center text-gray-600">No polls available.</p>
+        )}
+
         <div className="space-y-5">
 
           {polls.map((poll) => (
 
             <div
-              key={poll.id}
+              key={poll._id}
               className="bg-white rounded-xl shadow-md p-5 hover:shadow-lg transition-all duration-300"
             >
 
@@ -62,11 +69,11 @@ export default function PollsPage() {
               <div className="flex justify-between items-center mt-3">
 
                 <span className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">
-                  📍 {poll.location}
+                  📍 {poll.targetLocation}
                 </span>
 
                 <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
-                  🗳 {poll.totalVotes} Votes
+                  🗳 {poll.totalVotes || 0} Votes
                 </span>
 
               </div>
@@ -74,15 +81,17 @@ export default function PollsPage() {
               {/* Buttons */}
               <div className="flex gap-3 mt-5">
 
-                <button
-                  onClick={() => router.push(`/polls/${poll.id}/vote`)}
-                  className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
-                >
-                  Vote
-                </button>
+                {role === "citizen" && (
+                  <button
+                    onClick={() => router.push(`/polls/${poll._id}/vote`)}
+                    className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
+                  >
+                    Vote
+                  </button>
+                )}
 
                 <button
-                  onClick={() => router.push(`/polls/${poll.id}/results`)}
+                  onClick={() => router.push(`/polls/${poll._id}/results`)}
                   className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
                 >
                   View Results

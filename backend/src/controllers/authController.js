@@ -40,6 +40,21 @@ exports.getMe = async (req, res) => {
 
 
 
+// ================= GET UNIQUE LOCATIONS (/auth/locations) =================
+exports.getLocations = async (req, res) => {
+  try {
+    const locations = await User.find({}).distinct("location");
+    const validLocations = locations.filter(loc => loc && loc.trim() !== "").sort();
+
+    res.status(200).json({
+      message: "Locations retrieved successfully",
+      locations: validLocations
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
 // ================= REGISTER =================
 exports.registerUser = async (req, res) => {
   try {

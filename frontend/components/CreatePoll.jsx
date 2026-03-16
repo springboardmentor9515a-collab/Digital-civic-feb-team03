@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-export default function CreatePoll({ role }: { role: string }) {
+export default function CreatePoll({ role }) {
   const [question, setQuestion] = useState("")
 
   if (role !== "official") return null
