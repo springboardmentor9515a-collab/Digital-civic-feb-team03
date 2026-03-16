@@ -33,12 +33,15 @@ const createPoll = async (req, res) => {
 
     const sanitizedTitle = sanitizePlainText(title);
     const sanitizedLocation = sanitizePlainText(targetLocation);
-    const sanitizedOptions = sanitizeOptions(Array.isArray(options) ? options : []);
+    const sanitizedOptions = sanitizeOptions(
+      Array.isArray(options) ? options : [],
+    );
 
     if (!sanitizedTitle || !sanitizedLocation || sanitizedOptions.length < 2) {
       return res.status(400).json({
         success: false,
-        message: "Title, targetLocation and at least two valid poll options are required",
+        message:
+          "Title, targetLocation and at least two valid poll options are required",
       });
     }
 
@@ -54,12 +57,12 @@ const createPoll = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Poll created successfully",
-      poll
+      poll,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -67,16 +70,18 @@ const createPoll = async (req, res) => {
 // Get All Polls
 const getPolls = async (req, res) => {
   try {
-    const polls = await Poll.find(req.locationFilter || {}).sort({ createdAt: -1 });
+    const polls = await Poll.find(req.locationFilter || {}).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({
       success: true,
-      polls
+      polls,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -91,14 +96,13 @@ const getPollById = async (req, res) => {
     }
 
     res.status(200).json(poll);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 module.exports = {
-    createPoll,
-    getPolls,
-    getPollById,
-  };
+  createPoll,
+  getPolls,
+  getPollById,
+};
