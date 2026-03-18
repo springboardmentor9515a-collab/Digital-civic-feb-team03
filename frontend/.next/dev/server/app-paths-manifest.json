@@ -1,13 +1,9 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/admin/page": "app/admin/page.js",
   "/create-poll/page": "app/create-poll/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
   "/petitions/create/page": "app/petitions/create/page.js",
-  "/polls/[id]/results/page": "app/polls/[id]/results/page.js",
-  "/polls/[id]/vote/page": "app/polls/[id]/vote/page.js",
-  "/polls/page": "app/polls/page.js",
-  "/register/page": "app/register/page.js"
+  "/petitions/page": "app/petitions/page.js",
+  "/polls/page": "app/polls/page.js"
 }

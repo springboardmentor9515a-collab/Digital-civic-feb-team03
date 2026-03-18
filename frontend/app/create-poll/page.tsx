@@ -17,25 +17,27 @@ export default function CreatePoll() {
   useEffect(() => {
     const checkRole = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token")
         if (!token) {
-          router.push("/login");
-          return;
-        }
-        const userRes = await getCurrentUser(token);
-        if (userRes.user.role !== "official") {
-          router.push("/polls");
-          return;
+          router.push("/login")
+          return
         }
 
-        const locRes = await getLocations(token);
-        setAvailableLocations(locRes.locations);
+        const userRes = await getCurrentUser(token)
+        if (userRes.user.role !== "official") {
+          router.push("/polls")
+          return
+        }
+
+        const locRes = await getLocations(token)
+        setAvailableLocations(locRes.locations)
       } catch {
-        router.push("/login");
+        router.push("/login")
       }
-    };
-    checkRole();
-  }, [router]);
+    }
+
+    checkRole()
+  }, [router])
 
   const addOption = () => {
     setOptions([...options, ""])
@@ -75,8 +77,8 @@ export default function CreatePoll() {
       })
 
       alert("Poll Created Successfully")
-
       router.push("/polls")
+
     } catch (err: any) {
       setError(err.message || "Failed to create poll")
     } finally {
@@ -85,91 +87,103 @@ export default function CreatePoll() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 p-10">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 flex items-center justify-center p-6">
 
-      <h2 className="text-2xl font-bold mb-6">Create Poll</h2>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
 
-      {error && <p className="text-red-500">{error}</p>}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-
-        <input
-          type="text"
-          placeholder="Poll Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded bg-white text-black"
-          required
-        />
-
-        <select
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded bg-white text-black"
-          required
-        >
-          <option value="">Select Location</option>
-          {availableLocations.map((loc, idx) => (
-            <option key={idx} value={loc}>
-              {loc}
-            </option>
-          ))}
-          {availableLocations.length === 0 && (
-            <option disabled>Loading locations...</option>
-          )}
-        </select>
-
-        {/* Poll Options */}
-
-        <div>
-          <label className="font-semibold">Options</label>
-
-          {options.map((option, index) => (
-            <div key={index} className="flex gap-2 mt-2">
-
-              <input
-                type="text"
-                placeholder={`Option ${index + 1}`}
-                value={option}
-                onChange={(e) =>
-                  handleOptionChange(e.target.value, index)
-                }
-                className="w-full p-3 border border-gray-300 rounded bg-white text-black"
-                required
-              />
-
-              {options.length > 2 && (
-                <button
-                  type="button"
-                  onClick={() => removeOption(index)}
-                  className="text-red-500"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={addOption}
-            className="mt-3 text-blue-600"
-          >
-            + Add Option
-          </button>
-
+        {/* Header */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="text-3xl mb-2">🗳️</div>
+          <h2 className="text-2xl font-bold text-black">Create Poll</h2>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-indigo-600 text-white p-3 rounded-lg"
-        >
-          {loading ? "Creating..." : "Create Poll"}
-        </button>
+        {error && (
+          <p className="text-red-500 text-center mb-4">
+            {error}
+          </p>
+        )}
 
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-5">
 
+          {/* Title */}
+          <input
+            type="text"
+            placeholder="Enter poll title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            required
+          />
+
+          {/* Location */}
+          <select
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            required
+          >
+            <option value="">Select Location</option>
+
+            {availableLocations.map((loc, idx) => (
+              <option key={idx} value={loc}>
+                {loc}
+              </option>
+            ))}
+
+            {availableLocations.length === 0 && (
+              <option disabled>Loading locations...</option>
+            )}
+          </select>
+
+          {/* Options */}
+          <div className="space-y-3">
+            {options.map((option, index) => (
+              <div key={index} className="flex gap-2">
+
+                <input
+                  type="text"
+                  placeholder={`Option ${index + 1}`}
+                  value={option}
+                  onChange={(e) =>
+                    handleOptionChange(e.target.value, index)
+                  }
+                  className="w-full p-3 border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  required
+                />
+
+                {options.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => removeOption(index)}
+                    className="text-red-500 text-sm"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addOption}
+              className="text-blue-600 text-sm"
+            >
+              + Add Option
+            </button>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-3 rounded-lg font-medium hover:opacity-90 transition"
+          >
+            {loading ? "Creating..." : "Create Poll"}
+          </button>
+
+        </form>
+
+      </div>
     </div>
   )
 }
