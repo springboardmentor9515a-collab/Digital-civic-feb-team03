@@ -1,9 +1,9 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/create-poll/page": "app/create-poll/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/page1/page": "app/dashboard/page1/page.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/petitions/create/page": "app/petitions/create/page.js",
-  "/petitions/page": "app/petitions/page.js",
-  "/polls/page": "app/polls/page.js"
+  "/petitions/[id]/page": "app/petitions/[id]/page.js"
 }
