@@ -182,167 +182,119 @@ export default function Dashboard() {
         </div>
 
         {/* Petition Section */}
-        <div className="mt-16">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">
-              {role === "official" ? "Petitions in Your Area" : "Active Petitions"}
-            </h2>
-            <RoleBasedUI allowedRoles={["citizen"]}>
-  <button
-    onClick={() => router.push("/petitions/create")}
-    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition"
-  >
-    + Create Petition
-  </button>
-</RoleBasedUI>
-              >
-                + Create Petition
-              </button>
-            )}
-          </div>
-
-          {petitions.length === 0 ? (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-500 shadow-md">
-              <p>No petitions found.</p>
-              {role === "citizen" && (
-                <button
-                  onClick={() => router.push("/petitions/create")}
-                  className="mt-4 text-indigo-600 hover:underline"
-                >
-                  Create your first petition →
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {petitions.map((petition) => (
-                <div
-                  key={petition._id}
-                  className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
-                  onClick={() => router.push(`/petitions/${petition._id}`)}
-                >
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-xl font-semibold">
-                      {petition.title}
-                    </h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${petition.status === "active" ? "bg-green-100 text-green-700" :
-                        petition.status === "under_review" ? "bg-yellow-100 text-yellow-700" :
-                          petition.status === "resolved" ? "bg-blue-100 text-blue-700" :
-                            "bg-gray-100 text-gray-700"
-                      }`}>
-                      {petition.status.replace("_", " ")}
-                    </span>
-                  </div>
-
-                  <div className="mt-2 flex gap-4 text-sm text-gray-500">
-                    <span>📍 {petition.location}</span>
-                    <span>📂 {petition.category.replace("_", " ")}</span>
-                  </div>
-
-                  <p className="text-indigo-600 font-bold mt-2">
-                    ✍️ {petition.signatureCount ?? petition.signatures?.length ?? 0} signatures
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      {/* Official Tools */}
-<RoleBasedUI allowedRoles={["official"]}>
-  <div className="mt-16 bg-white p-6 rounded-xl shadow-md">
-    <h2 className="text-2xl font-bold mb-4">
-      Official Actions
+<div className="mt-16">
+  <div className="flex items-center justify-between mb-6">
+    <h2 className="text-2xl font-bold">
+      {role === "official"
+        ? "Petitions in Your Area"
+        : "Active Petitions"}
     </h2>
 
-    <button
-      onClick={() => router.push("/reports")}
-      className="bg-indigo-600 text-white px-4 py-2 rounded-lg"
-    >
-      View & Export Reports
-    </button>
-  </div>
-</RoleBasedUI>
-      
-        
-        {/* Poll Section */}
-<div className="mt-16">
-
-  <h2 className="text-2xl font-bold mb-6">
-    Community Polls
-  </h2>
-
-  {/* Citizens can vote */}
-  {/* Poll Section */}
-<div className="mt-16">
-
-  <h2 className="text-2xl font-bold mb-6">
-    Community Polls
-  </h2>
-
-  {/* Citizen Access */}
-  <RoleBasedUI allowedRoles={["citizen"]}>
-    <div className="mb-10 bg-white p-6 rounded-xl shadow-md flex justify-between items-center">
-      <div>
-        <h3 className="text-xl font-semibold">Active Community Polls</h3>
-        <p className="text-gray-500 text-sm mt-1">
-          Vote on issues that matter in your location.
-        </p>
-      </div>
-
+    <RoleBasedUI allowedRoles={["citizen"]}>
       <button
-        onClick={() => router.push("/polls")}
-        className="bg-indigo-600 text-white px-5 py-2 rounded-lg"
+        onClick={() => router.push("/petitions/create")}
+        className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition"
       >
-        View Polls
+        + Create Petition
       </button>
-    </div>
-  </RoleBasedUI>
+    </RoleBasedUI>
+  </div>
 
-  {/* Official Access */}
-  <RoleBasedUI allowedRoles={["official"]}>
-    <div className="bg-white p-6 rounded-xl shadow-md flex justify-between items-center">
-      <div>
-        <h3 className="text-xl font-semibold">Manage Polls</h3>
-        <p className="text-gray-500 text-sm mt-1">
-          Create and monitor polls.
-        </p>
-      </div>
+  <div className="space-y-6">
+            {petitions.map((petition) => (
+              <div
+                key={petition._id}
+                className="p-6 bg-white rounded-xl shadow-md cursor-pointer"
+                onClick={() =>
+                  router.push(`/petitions/${petition._id}`)
+                }
+              >
+                <h3 className="font-semibold text-lg">
+                  {petition.title}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  📍 {petition.location}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      <div className="flex gap-3">
-        <button
-          onClick={() => router.push("/polls")}
-          className="bg-indigo-100 text-indigo-700 px-5 py-2 rounded-lg"
-        >
-          View All
-        </button>
+        {/* COMMUNITY POLLS */}
+        <div className="mt-16">
 
-        <button
-          onClick={() => router.push("/create-poll")}
-          className="bg-indigo-600 text-white px-5 py-2 rounded-lg"
-        >
-          + Create Poll
-        </button>
-      </div>
-    </div>
-  </RoleBasedUI>
+          <h2 className="text-2xl font-bold mb-6">
+            Community Polls
+          </h2>
 
-</div>
-        >
-          View All
-        </button>
-        <button
-          onClick={() => router.push("/create-poll")}
-          className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-indigo-700 transition"
-        >
-          + Create Poll
-        </button>
-      </div>
-    </div>
-  )}
+          {/* Citizen */}
+          <RoleBasedUI allowedRoles={["citizen"]}>
+            <div className="bg-white p-6 rounded-xl shadow-md flex justify-between">
+              <div>
+                <h3 className="font-semibold">
+                  Active Community Polls
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Vote on local issues.
+                </p>
+              </div>
 
-</div>
+              <button
+                onClick={() => router.push("/polls")}
+                className="bg-indigo-600 text-white px-5 py-2 rounded-lg"
+              >
+                View Polls
+              </button>
+            </div>
+          </RoleBasedUI>
+
+          {/* Official */}
+          <RoleBasedUI allowedRoles={["official"]}>
+            <div className="bg-white p-6 rounded-xl shadow-md flex justify-between mt-6">
+              <div>
+                <h3 className="font-semibold">Manage Polls</h3>
+                <p className="text-sm text-gray-500">
+                  Create and monitor polls.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => router.push("/polls")}
+                  className="bg-indigo-100 px-5 py-2 rounded-lg"
+                >
+                  View All
+                </button>
+
+                <button
+                  onClick={() => router.push("/create-poll")}
+                  className="bg-indigo-600 text-white px-5 py-2 rounded-lg"
+                >
+                  + Create Poll
+                </button>
+              </div>
+            </div>
+          </RoleBasedUI>
+
+        </div>
+
+        {/* OFFICIAL ADMIN TOOLS */}
+        <RoleBasedUI allowedRoles={["official"]}>
+          <div className="mt-16 bg-white p-6 rounded-xl shadow-md">
+            <h2 className="text-2xl font-bold mb-4">
+              Official Reports
+            </h2>
+
+            <button
+              onClick={() => router.push("/reports")}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg"
+            >
+              View & Export Reports
+            </button>
+          </div>
+        </RoleBasedUI>
+
       </main>
     </div>
   )
 }
-
