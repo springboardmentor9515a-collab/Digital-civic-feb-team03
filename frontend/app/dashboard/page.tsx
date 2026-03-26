@@ -247,6 +247,22 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+      {/* Official Tools */}
+<RoleBasedUI allowedRoles={["official"]}>
+  <div className="mt-16 bg-white p-6 rounded-xl shadow-md">
+    <h2 className="text-2xl font-bold mb-4">
+      Official Actions
+    </h2>
+
+    <button
+      onClick={() => router.push("/reports")}
+      className="bg-indigo-600 text-white px-4 py-2 rounded-lg"
+    >
+      View & Export Reports
+    </button>
+  </div>
+</RoleBasedUI>
+      
         
         {/* Poll Section */}
 <div className="mt-16">
