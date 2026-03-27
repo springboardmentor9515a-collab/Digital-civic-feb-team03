@@ -1,10 +1,12 @@
 "use client"
 
-// Mock components replaced with real links
+import VotePoll from "@/components/VotePoll"
+import CreatePoll from "@/components/CreatePoll"
 import SignPetition from "@/components/SignPetition"
 import RoleBasedUI from "@/components/RoleBasedUI"
 import DashboardLoading from "./DashboardLoading"
 import { useEffect, useState } from "react"
+import Link from "next/link";
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { LayoutDashboard, ClipboardList, User, LogOut, Menu, CheckCircle } from "lucide-react"
@@ -195,6 +197,11 @@ export default function Dashboard() {
                 + Create Petition
               </button>
             )}
+            <Link href="/dashboard/export">
+  <button className="bg-green-500 text-white px-3 py-2 rounded">
+    Export Reports
+  </button>
+</Link>
           </div>
 
           {petitions.length === 0 ? (
@@ -253,41 +260,15 @@ export default function Dashboard() {
 
   {/* Citizens can vote */}
   {role === "citizen" && (
-    <div className="mb-10 bg-white p-6 rounded-xl shadow-md flex justify-between items-center">
-      <div>
-        <h3 className="text-xl font-semibold">Active Community Polls</h3>
-        <p className="text-gray-500 text-sm mt-1">Vote on issues that matter in your location.</p>
-      </div>
-      <button
-        onClick={() => router.push("/polls")}
-        className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-indigo-700 transition"
-      >
-        View Polls
-      </button>
+    <div className="mb-10">
+      <VotePoll role={role} />
     </div>
   )}
 
   {/* Officials can create polls */}
   {role === "official" && (
-    <div className="bg-white p-6 rounded-xl shadow-md flex justify-between items-center">
-      <div>
-        <h3 className="text-xl font-semibold">Manage Polls</h3>
-        <p className="text-gray-500 text-sm mt-1">Create and monitor polls for your location.</p>
-      </div>
-      <div className="flex gap-3">
-        <button
-          onClick={() => router.push("/polls")}
-          className="bg-indigo-100 text-indigo-700 px-5 py-2 rounded-lg font-medium hover:bg-indigo-200 transition"
-        >
-          View All
-        </button>
-        <button
-          onClick={() => router.push("/create-poll")}
-          className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-indigo-700 transition"
-        >
-          + Create Poll
-        </button>
-      </div>
+    <div>
+      <CreatePoll role={role} />
     </div>
   )}
 
@@ -296,4 +277,3 @@ export default function Dashboard() {
     </div>
   )
 }
-
