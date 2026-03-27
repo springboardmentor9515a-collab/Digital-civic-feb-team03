@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/authMiddleware");
-const { isCitizen } = require("../middleware/roleMiddleware");
+const { isCitizen, isOfficial } = require("../middleware/roleMiddleware");
 const { validateObjectIdParam } = require("../middleware/validateObjectId");
 const {
   enforcePollLocationAccess,
 } = require("../middleware/pollAccessMiddleware");
-const { voteRateLimit } = require("../middleware/voteRateLimitMiddleware");
+const { voteRateLimit, reportRateLimit } = require("../middleware/voteRateLimitMiddleware");
 
 const { castVote, getPollResults } = require("../controllers/voteController");
 
@@ -22,8 +22,10 @@ router.post(
 router.get(
   "/:id/results",
   auth,
+  isOfficial,
   validateObjectIdParam("id"),
   enforcePollLocationAccess,
+  reportRateLimit,
   getPollResults,
 );
 

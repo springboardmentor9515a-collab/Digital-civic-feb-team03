@@ -1,6 +1,8 @@
 const WINDOW_MS = 60 * 1000;
-const MAX_REQUESTS_PER_WINDOW = 10;
-const requestStore = new Map();
+const RESPONSE_MAX_REQUESTS_PER_WINDOW = 10;
+const REPORT_MAX_REQUESTS_PER_WINDOW = 30;
+const responseRequestStore = new Map();
+const reportRequestStore = new Map();
 
 const buildKey = (req) => {
   const userId = req.user?._id?.toString() || "anonymous";
@@ -9,7 +11,7 @@ const buildKey = (req) => {
   return `${userId}:${ip}:${pollId}`;
 };
 
-const voteRateLimit = (req, res, next) => {
+const createRateLimiter = ({ requestStore, maxRequests, message }) => (req, res, next) => {
   const key = buildKey(req);
   const currentTime = Date.now();
   const existing = requestStore.get(key);
@@ -22,10 +24,10 @@ const voteRateLimit = (req, res, next) => {
     return next();
   }
 
-  if (existing.count >= MAX_REQUESTS_PER_WINDOW) {
+  if (existing.count >= maxRequests) {
     return res.status(429).json({
       success: false,
-      message: "Too many vote attempts. Please try again later.",
+      message,
       retryAfterMs: existing.resetAt - currentTime,
     });
   }
@@ -35,6 +37,22 @@ const voteRateLimit = (req, res, next) => {
   return next();
 };
 
+const responseRateLimit = createRateLimiter({
+  requestStore: responseRequestStore,
+  maxRequests: RESPONSE_MAX_REQUESTS_PER_WINDOW,
+  message: "Too many response attempts. Please try again later.",
+});
+
+const reportRateLimit = createRateLimiter({
+  requestStore: reportRequestStore,
+  maxRequests: REPORT_MAX_REQUESTS_PER_WINDOW,
+  message: "Too many report requests. Please try again later.",
+});
+
+const voteRateLimit = responseRateLimit;
+
 module.exports = {
+  responseRateLimit,
+  reportRateLimit,
   voteRateLimit,
 };

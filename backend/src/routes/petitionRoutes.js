@@ -2,6 +2,7 @@ const express = require("express");
 const { createPetition, getPetitions, getPetitionById } = require("../controllers/petitionController");
 const auth = require("../middleware/authMiddleware");
 const { isCitizen } = require("../middleware/roleMiddleware");
+const { validateObjectIdParam } = require("../middleware/validateObjectId");
 
 const router = express.Router();
 
@@ -18,6 +19,6 @@ router.get("/", getPetitions);
 /* ===========================
    GET SINGLE PETITION BY ID (Public endpoint)
 =========================== */
-router.get("/:id", getPetitionById);
+router.get("/:id", validateObjectIdParam("id"), getPetitionById);
 
 module.exports = router;
