@@ -8,7 +8,7 @@ const Signature = require("../models/Signature");
 const signPetition = async (req, res) => {
   try {
     const petitionId = req.params.id;
-    const userId = req.user._id;   // ⚠ IMPORTANT CHANGE
+    const userId = req.user._id; // ⚠ IMPORTANT CHANGE
 
     const petition = req.petition || (await Petition.findById(petitionId));
 

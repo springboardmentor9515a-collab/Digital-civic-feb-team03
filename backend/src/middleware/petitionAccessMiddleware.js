@@ -11,7 +11,9 @@ const enforcePetitionLocationAccess = async (req, res, next) => {
       });
     }
 
-    const petition = await Petition.findById(req.params.id).select("location status");
+    const petition = await Petition.findById(req.params.id).select(
+      "location status",
+    );
 
     if (!petition) {
       return res.status(404).json({

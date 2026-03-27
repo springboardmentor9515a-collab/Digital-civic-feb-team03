@@ -14,8 +14,8 @@ const analyticsRoutes = require("./src/routes/analyticsRoutes");
 dotenv.config();
 connectDB();
 
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first');
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 
@@ -24,7 +24,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3000",
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(cookieParser());

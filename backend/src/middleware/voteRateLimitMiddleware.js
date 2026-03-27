@@ -11,31 +11,33 @@ const buildKey = (req) => {
   return `${userId}:${ip}:${pollId}`;
 };
 
-const createRateLimiter = ({ requestStore, maxRequests, message }) => (req, res, next) => {
-  const key = buildKey(req);
-  const currentTime = Date.now();
-  const existing = requestStore.get(key);
+const createRateLimiter =
+  ({ requestStore, maxRequests, message }) =>
+  (req, res, next) => {
+    const key = buildKey(req);
+    const currentTime = Date.now();
+    const existing = requestStore.get(key);
 
-  if (!existing || currentTime > existing.resetAt) {
-    requestStore.set(key, {
-      count: 1,
-      resetAt: currentTime + WINDOW_MS,
-    });
+    if (!existing || currentTime > existing.resetAt) {
+      requestStore.set(key, {
+        count: 1,
+        resetAt: currentTime + WINDOW_MS,
+      });
+      return next();
+    }
+
+    if (existing.count >= maxRequests) {
+      return res.status(429).json({
+        success: false,
+        message,
+        retryAfterMs: existing.resetAt - currentTime,
+      });
+    }
+
+    existing.count += 1;
+    requestStore.set(key, existing);
     return next();
-  }
-
-  if (existing.count >= maxRequests) {
-    return res.status(429).json({
-      success: false,
-      message,
-      retryAfterMs: existing.resetAt - currentTime,
-    });
-  }
-
-  existing.count += 1;
-  requestStore.set(key, existing);
-  return next();
-};
+  };
 
 const responseRateLimit = createRateLimiter({
   requestStore: responseRequestStore,

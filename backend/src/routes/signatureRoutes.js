@@ -12,7 +12,10 @@ const { validateObjectIdParam } = require("../middleware/validateObjectId");
 const {
   enforcePetitionLocationAccess,
 } = require("../middleware/petitionAccessMiddleware");
-const { responseRateLimit, reportRateLimit } = require("../middleware/voteRateLimitMiddleware");
+const {
+  responseRateLimit,
+  reportRateLimit,
+} = require("../middleware/voteRateLimitMiddleware");
 
 // Sign Petition (Protected)
 router.post(

@@ -6,7 +6,10 @@ const { validateObjectIdParam } = require("../middleware/validateObjectId");
 const {
   enforcePollLocationAccess,
 } = require("../middleware/pollAccessMiddleware");
-const { voteRateLimit, reportRateLimit } = require("../middleware/voteRateLimitMiddleware");
+const {
+  voteRateLimit,
+  reportRateLimit,
+} = require("../middleware/voteRateLimitMiddleware");
 
 const { castVote, getPollResults } = require("../controllers/voteController");
 

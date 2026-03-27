@@ -1,5 +1,9 @@
 const express = require("express");
-const { createPetition, getPetitions, getPetitionById } = require("../controllers/petitionController");
+const {
+  createPetition,
+  getPetitions,
+  getPetitionById,
+} = require("../controllers/petitionController");
 const auth = require("../middleware/authMiddleware");
 const { isCitizen } = require("../middleware/roleMiddleware");
 const { validateObjectIdParam } = require("../middleware/validateObjectId");

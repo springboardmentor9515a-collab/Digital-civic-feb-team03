@@ -5,9 +5,16 @@ const Vote = require("../models/Vote");
 const parseMonthRange = (query) => {
   const now = new Date();
   const monthsBack = Number.parseInt(query.monthsBack, 10);
-  const safeMonthsBack = Number.isFinite(monthsBack) && monthsBack > 0 ? Math.min(monthsBack, 36) : 12;
+  const safeMonthsBack =
+    Number.isFinite(monthsBack) && monthsBack > 0
+      ? Math.min(monthsBack, 36)
+      : 12;
 
-  const from = new Date(now.getFullYear(), now.getMonth() - (safeMonthsBack - 1), 1);
+  const from = new Date(
+    now.getFullYear(),
+    now.getMonth() - (safeMonthsBack - 1),
+    1,
+  );
   const to = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
   return { from, to, monthsBack: safeMonthsBack };
