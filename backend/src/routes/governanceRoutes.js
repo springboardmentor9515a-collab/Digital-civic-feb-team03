@@ -1,13 +1,37 @@
-const express = require('express');
+const express = require("express");
+const {
+  getPetitionsForOfficial,
+  respondToPetition,
+} = require("../controllers/governanceController");
+const auth = require("../middleware/authMiddleware");
+const { isOfficial } = require("../middleware/roleMiddleware");
+const { validateObjectIdParam } = require("../middleware/validateObjectId");
+const {
+  enforcePetitionLocationAccess,
+} = require("../middleware/petitionAccessMiddleware");
+const {
+  responseRateLimit,
+  reportRateLimit,
+} = require("../middleware/voteRateLimitMiddleware");
+
 const router = express.Router();
-const { getPetitionsForOfficial, respondToPetition } = require('../controllers/governanceController');
-// const { protect, isOfficial } = require('../middleware/authMiddleware'); // Uncomment when middleware is ready
 
-// Routes for Governance APIs (Milestone 4 - Task 2)
-// GET /petitions (Auth required, Role = official)
-router.get('/petitions', /* protect, isOfficial, */ getPetitionsForOfficial);
+router.get(
+  "/petitions",
+  auth,
+  isOfficial,
+  reportRateLimit,
+  getPetitionsForOfficial,
+);
 
-// POST /petitions/:id/respond (Auth required, Role = official)
-router.post('/petitions/:id/respond', /* protect, isOfficial, */ respondToPetition);
+router.post(
+  "/petitions/:id/respond",
+  auth,
+  isOfficial,
+  validateObjectIdParam("id"),
+  enforcePetitionLocationAccess,
+  responseRateLimit,
+  respondToPetition,
+);
 
 module.exports = router;

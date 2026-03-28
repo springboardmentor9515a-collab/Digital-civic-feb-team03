@@ -1,13 +1,16 @@
-const express = require('express');
+const express = require("express");
+const {
+  generateReports,
+  exportReports,
+} = require("../controllers/reportsController");
+const auth = require("../middleware/authMiddleware");
+const { isOfficial } = require("../middleware/roleMiddleware");
+const { reportRateLimit } = require("../middleware/voteRateLimitMiddleware");
+
 const router = express.Router();
-const { generateReports, exportReports } = require('../controllers/reportsController');
-// const { protect, isOfficial } = require('../middleware/authMiddleware'); // Uncomment when middleware is ready
 
-// Routes for Reporting APIs (Milestone 4 - Task 3)
-// GET / (Auth required, Role = official)
-router.get('/', /* protect, isOfficial, */ generateReports);
+router.get("/", auth, isOfficial, reportRateLimit, generateReports);
 
-// GET /export (Auth required, Role = official)
-router.get('/export', /* protect, isOfficial, */ exportReports);
+router.get("/export", auth, isOfficial, reportRateLimit, exportReports);
 
 module.exports = router;

@@ -2,6 +2,38 @@ const Petition = require("../models/Petition");
 const Signature = require("../models/Signature");
 const Vote = require("../models/Vote");
 
+const sanitizeText = (value) =>
+  String(value || "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/[\u0000-\u001F\u007F]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const normalizeLocation = (value) => sanitizeText(value).toLowerCase();
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const resolveLocationScope = (req) => {
+  const userLocation = sanitizeText(req.user?.location || "");
+  if (!userLocation) {
+    const error = new Error("Official location is required");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const requestedLocation = sanitizeText(req.query.location || userLocation);
+  if (
+    requestedLocation &&
+    normalizeLocation(requestedLocation) !== normalizeLocation(userLocation)
+  ) {
+    const error = new Error("Cross-location access is not allowed");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  return new RegExp(`^${escapeRegExp(userLocation)}$`, "i");
+};
+
 const parseMonthRange = (query) => {
   const now = new Date();
   const monthsBack = Number.parseInt(query.monthsBack, 10);
@@ -30,11 +62,13 @@ const monthLabelExpression = {
 exports.getPetitionsPerStatus = async (req, res) => {
   try {
     const { from, to, monthsBack } = parseMonthRange(req.query);
+    const locationRegex = resolveLocationScope(req);
 
     const data = await Petition.aggregate([
       {
         $match: {
           createdAt: { $gte: from, $lt: to },
+          location: locationRegex,
         },
       },
       {
@@ -83,10 +117,11 @@ exports.getPetitionsPerStatus = async (req, res) => {
       success: true,
       monthsBack,
       range: { from, to },
+      location: req.user.location,
       data,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
       message: error.message,
     });
@@ -96,6 +131,7 @@ exports.getPetitionsPerStatus = async (req, res) => {
 exports.getSignaturesPerPetition = async (req, res) => {
   try {
     const { from, to, monthsBack } = parseMonthRange(req.query);
+    const locationRegex = resolveLocationScope(req);
 
     const data = await Signature.aggregate([
       {
@@ -113,6 +149,11 @@ exports.getSignaturesPerPetition = async (req, res) => {
       },
       {
         $unwind: "$petition",
+      },
+      {
+        $match: {
+          "petition.location": locationRegex,
+        },
       },
       {
         $group: {
@@ -172,10 +213,11 @@ exports.getSignaturesPerPetition = async (req, res) => {
       success: true,
       monthsBack,
       range: { from, to },
+      location: req.user.location,
       data,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
       message: error.message,
     });
@@ -185,6 +227,7 @@ exports.getSignaturesPerPetition = async (req, res) => {
 exports.getPollVotesPerLocation = async (req, res) => {
   try {
     const { from, to, monthsBack } = parseMonthRange(req.query);
+    const locationRegex = resolveLocationScope(req);
 
     const data = await Vote.aggregate([
       {
@@ -202,6 +245,11 @@ exports.getPollVotesPerLocation = async (req, res) => {
       },
       {
         $unwind: "$poll",
+      },
+      {
+        $match: {
+          "poll.targetLocation": locationRegex,
+        },
       },
       {
         $group: {
@@ -250,10 +298,11 @@ exports.getPollVotesPerLocation = async (req, res) => {
       success: true,
       monthsBack,
       range: { from, to },
+      location: req.user.location,
       data,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
       message: error.message,
     });
