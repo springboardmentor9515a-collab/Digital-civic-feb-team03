@@ -9,6 +9,8 @@ const signatureRoutes = require("./src/routes/signatureRoutes");
 const petitionRoutes = require("./src/routes/petitionRoutes");
 const pollRoutes = require("./src/routes/pollRoutes");
 const voteRoutes = require("./src/routes/voteRoutes");
+const governanceRoutes = require("./src/routes/governanceRoutes");
+const reportsRoutes = require("./src/routes/reportsRoutes");
 
 dotenv.config();
 connectDB();
@@ -34,6 +36,8 @@ app.use("/api/petitions", signatureRoutes);
 app.use("/api/petitions", petitionRoutes);
 app.use("/api/polls", pollRoutes);
 app.use("/api/polls", voteRoutes);
+app.use("/api/governance", governanceRoutes);
+app.use("/api/reports", reportsRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend is running...");
