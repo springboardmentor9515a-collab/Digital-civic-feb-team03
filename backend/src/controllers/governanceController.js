@@ -4,11 +4,15 @@ const { logAction } = require("../utils/logger");
 const ALLOWED_STATUSES = new Set([
   "under_review",
   "active",
-  "resolved",
-  "rejected",
+  "under_review",
+  "closed",
 ]);
 
-const ALLOWED_RESPONSE_STATUSES = new Set(["active", "resolved", "rejected"]);
+const ALLOWED_RESPONSE_STATUSES = new Set([
+  "active",
+  "under_review",
+  "closed",
+]);
 
 const normalizeLocation = (value) =>
   String(value || "")
@@ -106,7 +110,7 @@ exports.respondToPetition = async (req, res) => {
   try {
     const petitionId = req.params.id;
     const responseText = sanitizeText(req.body?.responseText);
-    const nextStatus = sanitizeText(req.body?.status || "resolved");
+    const nextStatus = sanitizeText(req.body?.status || "under_review");
 
     if (!responseText) {
       return res.status(400).json({
@@ -135,14 +139,14 @@ exports.respondToPetition = async (req, res) => {
         $set: {
           status: nextStatus,
           officialResponse: responseText,
-          officialRespondedBy: req.user._id,
-          officialRespondedAt: new Date(),
+          respondedBy: req.user._id,
+          respondedAt: new Date(),
         },
       },
       { new: true },
     )
       .populate("creator", "name email location")
-      .populate("officialRespondedBy", "name email location role");
+      .populate("respondedBy", "name email location role");
 
     if (!petition) {
       return res.status(404).json({
