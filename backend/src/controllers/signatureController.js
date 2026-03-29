@@ -1,4 +1,4 @@
-const Petition = require("../../models/Petition");
+const Petition = require("../models/Petition");
 const Signature = require("../models/Signature");
 
 //////////////////////////////////////////////////////

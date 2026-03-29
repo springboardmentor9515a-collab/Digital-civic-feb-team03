@@ -1,7 +1,7 @@
 const express = require("express");
 const { createPetition, getPetitions, getPetitionById } = require("../controllers/petitionController");
-const auth = require("../src/middleware/authMiddleware");
-const { isCitizen } = require("../src/middleware/roleMiddleware");
+const auth = require("../middleware/authMiddleware");
+const { isCitizen } = require("../middleware/roleMiddleware");
 
 const router = express.Router();
 
