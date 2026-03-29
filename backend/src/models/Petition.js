@@ -34,8 +34,8 @@ const petitionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["under_review", "active", "resolved", "rejected"],
-      default: "under_review",
+      enum: ["active", "under_review", "closed"],
+      default: "active",
       index: true,
     },
     creator: {
@@ -62,12 +62,12 @@ const petitionSchema = new mongoose.Schema(
       maxlength: [2000, "Official response cannot exceed 2000 characters"],
       default: null,
     },
-    officialRespondedBy: {
+    respondedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
-    officialRespondedAt: {
+    respondedAt: {
       type: Date,
       default: null,
     },
