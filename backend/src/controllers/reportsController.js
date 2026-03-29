@@ -4,10 +4,9 @@ const Vote = require("../models/Vote");
 const { logAction } = require("../utils/logger");
 
 const ALLOWED_STATUSES = new Set([
-  "under_review",
   "active",
-  "resolved",
-  "rejected",
+  "under_review",
+  "closed",
 ]);
 
 const parseDateOrNull = (value) => {
