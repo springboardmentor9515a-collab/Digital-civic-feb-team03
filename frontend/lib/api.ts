@@ -77,6 +77,15 @@ export async function getCurrentUser(token: string) {
   });
 }
 
+export async function getLocations(token: string) {
+  return apiRequest<{ message: string; locations: string[] }>("/auth/locations", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
 // ─── Petition Types ──────────────────────────────────────────────
 
 export type PetitionStatus = "under_review" | "active" | "resolved" | "rejected";
@@ -167,3 +176,74 @@ export async function getSignatureCount(petitionId: string) {
     `/petitions/${petitionId}/signatures/count`
   );
 }
+
+// ─── Poll Types ──────────────────────────────────────────────
+
+export type PollOptionResult = {
+  option: string;
+  votes: number;
+  percentage: number;
+};
+
+export type Poll = {
+  _id: string;
+  title: string;
+  options: string[];
+  targetLocation: string;
+  createdBy: string;
+  totalVotes?: number;
+  results?: PollOptionResult[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PollListResponse = {
+  success: boolean;
+  polls: Poll[];
+};
+
+// ─── Poll APIs ───────────────────────────────────────────────
+
+export async function createPoll(
+  token: string,
+  data: { title: string; options: string[]; targetLocation: string }
+) {
+  return apiRequest<{ success: boolean; message: string; poll: Poll }>("/polls", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getPolls(token: string, location?: string) {
+  const query = new URLSearchParams();
+  if (location) query.set("location", location);
+  const qs = query.toString();
+  return apiRequest<PollListResponse>(`/polls${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function getPollById(token: string, id: string) {
+  return apiRequest<Poll>(`/polls/${id}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function voteOnPoll(
+  token: string,
+  id: string,
+  selectedOption: string
+) {
+  return apiRequest<{ success: boolean; message: string; vote: any }>(
+    `/polls/${id}/vote`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ selectedOption }),
+    }
+  );
+}
+

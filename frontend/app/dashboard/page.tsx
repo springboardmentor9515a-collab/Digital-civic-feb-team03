@@ -1,9 +1,11 @@
 "use client"
 
+
 import VotePoll from "@/components/VotePoll"
 import CreatePoll from "@/components/CreatePoll"
 import DashboardLoading from "./DashboardLoading"
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { LayoutDashboard, ClipboardList, User, LogOut, Menu, CheckCircle } from "lucide-react"
@@ -194,6 +196,12 @@ export default function Dashboard() {
                 + Create Petition
               </button>
             )}
+            <Link
+              href="/dashboard/export"
+              className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition"
+            >
+              Export Reports
+            </Link>
           </div>
 
           {petitions.length === 0 ? (
@@ -242,31 +250,28 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-        
+
         {/* Poll Section */}
-<div className="mt-16">
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold mb-6">
+            Community Polls
+          </h2>
 
-  <h2 className="text-2xl font-bold mb-6">
-    Community Polls
-  </h2>
+          {/* Citizens can vote */}
+          {role === "citizen" && (
+            <div className="mb-10">
+              <VotePoll role={role} />
+            </div>
+          )}
 
-  {/* Citizens can vote */}
-  {role === "citizen" && (
-    <div className="mb-10">
-      <VotePoll role={role} />
-    </div>
-  )}
-
-  {/* Officials can create polls */}
-  {role === "official" && (
-    <div>
-      <CreatePoll role={role} />
-    </div>
-  )}
-
-</div>
+          {/* Officials can create polls */}
+          {role === "official" && (
+            <div>
+              <CreatePoll role={role} />
+            </div>
+          )}
+        </div>
       </main>
     </div>
   )
 }
-

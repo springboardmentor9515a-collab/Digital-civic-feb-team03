@@ -9,12 +9,15 @@ const signatureRoutes = require("./src/routes/signatureRoutes");
 const petitionRoutes = require("./src/routes/petitionRoutes");
 const pollRoutes = require("./src/routes/pollRoutes");
 const voteRoutes = require("./src/routes/voteRoutes");
+const analyticsRoutes = require("./src/routes/analyticsRoutes");
+const governanceRoutes = require("./src/routes/governanceRoutes");
+const reportsRoutes = require("./src/routes/reportsRoutes");
 
 dotenv.config();
 connectDB();
 
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first');
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 
@@ -23,7 +26,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3000",
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(cookieParser());
@@ -34,6 +37,9 @@ app.use("/api/petitions", signatureRoutes);
 app.use("/api/petitions", petitionRoutes);
 app.use("/api/polls", pollRoutes);
 app.use("/api/polls", voteRoutes);
+app.use("/api/reports", analyticsRoutes);
+app.use("/api/governance", governanceRoutes);
+app.use("/api/reports", reportsRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend is running...");

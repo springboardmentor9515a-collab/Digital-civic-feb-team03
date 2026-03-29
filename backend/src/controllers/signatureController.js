@@ -8,9 +8,9 @@ const Signature = require("../models/Signature");
 const signPetition = async (req, res) => {
   try {
     const petitionId = req.params.id;
-    const userId = req.user._id;   // ⚠ IMPORTANT CHANGE
+    const userId = req.user._id; // ⚠ IMPORTANT CHANGE
 
-    const petition = await Petition.findById(petitionId);
+    const petition = req.petition || (await Petition.findById(petitionId));
 
     if (!petition) {
       return res.status(404).json({ message: "Petition not found" });
