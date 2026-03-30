@@ -2,6 +2,7 @@ const Petition = require("../models/Petition");
 const Signature = require("../models/Signature");
 const Vote = require("../models/Vote");
 const { logAction } = require("../utils/logger");
+const PDFDocument = require("pdfkit");
 
 const ALLOWED_STATUSES = new Set([
   "active",
@@ -423,10 +424,10 @@ exports.exportReports = async (req, res) => {
     const { from, to } = resolveRange(req.query);
     const format = sanitizeText(req.query.format || "csv").toLowerCase();
 
-    if (!["csv", "json"].includes(format)) {
+    if (!["csv", "json", "pdf"].includes(format)) {
       return res.status(400).json({
         success: false,
-        message: "Unsupported format. Use format=csv or format=json",
+        message: "Unsupported format. Use format=csv, json, or pdf",
       });
     }
 
@@ -455,8 +456,50 @@ exports.exportReports = async (req, res) => {
       });
     }
 
-    const csvContent = buildCsv(report);
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+    if (format === "pdf") {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="report-${timestamp}.pdf"`,
+      );
+
+      const doc = new PDFDocument();
+      doc.pipe(res);
+
+      doc.fontSize(20).text(`Reports Dashboard Export`, { align: 'center' });
+      doc.moveDown();
+      doc.fontSize(12).text(`Location: ${location || 'All'}`);
+      doc.text(`Status: ${status || 'All'}`);
+      doc.text(`Date Range: ${from ? new Date(from).toLocaleDateString() : 'Start'} to ${to ? new Date(to).toLocaleDateString() : 'Now'}`);
+      doc.moveDown();
+      
+      doc.fontSize(16).text('Petitions Per Status');
+      doc.fontSize(10);
+      report.petitionsPerStatus.forEach(row => {
+          doc.text(`- ${row.status}: ${row.total}`);
+      });
+      doc.moveDown();
+
+      doc.fontSize(16).text('Signatures Per Petition (Top)');
+      doc.fontSize(10);
+      report.signaturesPerPetition.slice(0, 50).forEach(row => {
+          doc.text(`- ${row.title}: ${row.totalSignatures}`);
+      });
+      doc.moveDown();
+
+      doc.fontSize(16).text('Poll Votes Per Location');
+      doc.fontSize(10);
+      report.pollVotesPerLocation.forEach(row => {
+          doc.text(`- ${row.location}: ${row.totalVotes}`);
+      });
+
+      doc.end();
+      return;
+    }
+
+    const csvContent = buildCsv(report);
 
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader(

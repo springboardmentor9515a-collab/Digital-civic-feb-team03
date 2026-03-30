@@ -112,6 +112,15 @@ export type Petition = {
   };
   signatures: { user: string; signedAt: string }[];
   signatureCount?: number;
+  officialResponse?: string | null;
+  respondedBy?: {
+    _id: string;
+    name: string;
+    email?: string;
+    location?: string;
+    role?: string;
+  } | null;
+  respondedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -247,3 +256,74 @@ export async function voteOnPoll(
   );
 }
 
+// ─── Governance APIs ──────────────────────────────────────────────
+
+export async function getGovernancePetitions(token: string, params?: {
+  location?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const query = new URLSearchParams();
+  if (params?.location) query.set("location", params.location);
+  if (params?.status) query.set("status", params.status);
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  const qs = query.toString();
+  return apiRequest<PetitionListResponse>(`/governance/petitions${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+}
+
+export async function respondToPetition(
+  token: string,
+  id: string,
+  responseText: string,
+  status: string
+) {
+  return apiRequest<{ success: boolean; message: string; petition: Petition }>(
+    `/governance/petitions/${id}/respond`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ responseText, status }),
+    }
+  );
+}
+
+// ─── Reports APIs ───────────────────────────────────────────────
+
+export type ReportData = {
+  petitionsPerStatus: any[];
+  signaturesPerPetition: any[];
+  pollVotesPerLocation: any[];
+};
+
+export type ReportResponse = {
+  success: boolean;
+  generatedAt: string;
+  filters: any;
+  data: ReportData;
+};
+
+export async function getReports(
+  token: string,
+  params?: {
+    location?: string;
+    status?: string;
+    from?: string;
+    to?: string;
+  }
+) {
+  const query = new URLSearchParams();
+  if (params?.location) query.set("location", params.location);
+  if (params?.status) query.set("status", params.status);
+  if (params?.from) query.set("from", params.from);
+  if (params?.to) query.set("to", params.to);
+  const qs = query.toString();
+  return apiRequest<ReportResponse>(`/reports${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+}

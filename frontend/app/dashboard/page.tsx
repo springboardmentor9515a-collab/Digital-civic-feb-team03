@@ -188,20 +188,32 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold">
               {role === "official" ? "Petitions in Your Area" : "Active Petitions"}
             </h2>
-            {role === "citizen" && (
-              <button
-                onClick={() => router.push("/petitions/create")}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition"
-              >
-                + Create Petition
-              </button>
-            )}
-            <Link
-              href="/dashboard/export"
-              className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition"
-            >
-              Export Reports
-            </Link>
+            <div className="flex gap-3">
+              {role === "citizen" && (
+                <button
+                  onClick={() => router.push("/petitions/create")}
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-sm"
+                >
+                  + Create Petition
+                </button>
+              )}
+              {role === "official" && (
+                <>
+                  <Link
+                    href="/dashboard/reports"
+                    className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition shadow-sm"
+                  >
+                    View Reports
+                  </Link>
+                  <Link
+                    href="/dashboard/export"
+                    className="bg-white border text-indigo-600 border-indigo-200 px-4 py-2 rounded-lg font-semibold hover:bg-indigo-50 transition shadow-sm"
+                  >
+                    Export Data
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
 
           {petitions.length === 0 ? (

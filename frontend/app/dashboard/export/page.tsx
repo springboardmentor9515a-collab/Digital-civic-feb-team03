@@ -16,16 +16,31 @@ export default function ExportPage() {
     setSuccess(false);
     try {
       const token = localStorage.getItem("token");
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:5000/api";
       const res = await fetch(
-        `http://localhost:5000/api/export/${format}?status=${status}`,
+        `${API_BASE_URL}/reports/export?format=${format}&status=${status}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      if (!res.ok) {
+        throw new Error("Export failed");
+      }
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
+      a.style.display = "none";
       a.href = url;
-      a.download = `report.${format}`;
+      a.setAttribute("download", `report-${new Date().getTime()}.${format}`);
+      document.body.appendChild(a);
       a.click();
+      
+      // We increased the timeout significantly. If the user has "Ask where to save" enabled 
+      // in their browser settings, they might take several seconds to click 'Save'. 
+      // Revoking it too early destroys the file pointer before it can be written to disk!
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 60000);
+
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
